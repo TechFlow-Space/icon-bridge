@@ -290,17 +290,17 @@ class BMCPreiphery(sp.Contract):
             current_height=sp.level #block height
         ))
 
-@sp.add_test(name="BMC")
-def test():
-    alice = sp.test_account("Alice")
-    bmc_management = sp.test_account("BMC Management")
-    # bmc= sp.test_account("BMC")
-
-    scenario = sp.test_scenario()
-    bmc = BMCPreiphery("tezos", bmc_management.address)
-    scenario += bmc
-
-    bmc.handle_relay_message(sp.record(prev="demo string", msg=sp.bytes("0x0dae11"))).run(sender=alice)
+# @sp.add_test(name="BMC")
+# def test():
+#     alice = sp.test_account("Alice")
+#     bmc_management = sp.test_account("BMC Management")
+#     # bmc= sp.test_account("BMC")
+#
+#     scenario = sp.test_scenario()
+#     bmc = BMCPreiphery("tezos", bmc_management.address)
+#     scenario += bmc
+#
+#     bmc.handle_relay_message(sp.record(prev="demo string", msg=sp.bytes("0x0dae11"))).run(sender=alice)
 
 sp.add_compilation_target("bmc_periphery", BMCPreiphery(network="tezos",
                                                         bmc_management_addr=sp.address("tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW")))

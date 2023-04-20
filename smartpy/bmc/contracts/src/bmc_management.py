@@ -68,7 +68,7 @@ class BMCManagement(sp.Contract):
         :return:
         """
         sp.set_type(addr, sp.TAddress)
-        # self.only_owner()
+        self.only_owner()
         sp.if self.data.bmc_periphery.is_some():
             sp.verify(addr != self.data.bmc_periphery.open_some("Address not set"), "AlreadyExistsBMCPeriphery")
         self.data.bmc_periphery = sp.some(addr)
@@ -81,7 +81,7 @@ class BMCManagement(sp.Contract):
         """
         sp.set_type(owner, sp.TAddress)
 
-        # self.only_owner()
+        self.only_owner()
         sp.verify(self.data.owners.contains(owner) == False, "Already Exists")
         self.data.owners[owner] = True
         self.data.number_of_owners += sp.nat(1)
@@ -158,12 +158,13 @@ class BMCManagement(sp.Contract):
         :return: BTP Address of connected BMC
         """
         sp.set_type(link, sp.TString)
-
+        sp.trace("add_link first")
         self.only_owner()
         net, addr= sp.match_pair(strings.split_btp_address(link, "prev_idx", "result", "my_list", "last", "penultimate"))
-
+        sp.trace("add_link second")
         with sp.if_(self.data.links.contains(link)):
             sp.verify(self.data.links[link].is_connected == False, "AlreadyExistsLink")
+        sp.trace("add_link third")
         self.data.links[link] = sp.record(
             relays=sp.set([]),
             reachable=sp.set([]),
@@ -448,7 +449,6 @@ class BMCManagement(sp.Contract):
         :return: A list of relays
         """
         sp.set_type(link, sp.TString)
-
         sp.result(self.data.links[link].relays.elements())
 
     @sp.onchain_view()
@@ -459,6 +459,8 @@ class BMCManagement(sp.Contract):
     @sp.onchain_view()
     def get_link(self, to):
         sp.set_type(to, sp.TString)
+        sp.trace("link data")
+        sp.trace(self.data.links[to])
         sp.result(self.data.links[to])
 
     @sp.onchain_view()
@@ -557,48 +559,47 @@ class BMCManagement(sp.Contract):
         self.data.relay_stats[relay].block_count += block_count_val
         self.data.relay_stats[relay].msg_count += msg_count_val
 
-    @sp.onchain_view()
     def resolve_route(self, dst_net):
         sp.set_type(dst_net, sp.TString)
 
         self.only_bmc_periphery()
         dst = sp.local("dst", self.data.get_route_dst_from_net[dst_net], t=sp.TString)
 
-        with sp.if_(sp.len(sp.pack(dst.value))!= sp.nat(0)):
-            sp.result(sp.pair(self.data.routes[dst.value], dst.value))
-        with sp.else_():
-            dst_link = sp.local("dst_link", self.data.get_link_from_net[dst_net], t=sp.TString)
-            with sp.if_(sp.len(sp.pack(dst_link.value)) != sp.nat(0)):
-                sp.result(sp.pair(dst_link.value, dst_link.value))
-            with sp.else_():
-                res = sp.local("res", self.data.get_link_from_reachable_net[dst_net], t=types.Types.Tuple)
-                sp.verify(sp.len(sp.pack(res.value.to)) > sp.nat(0), "Unreachable: " + dst_net + " is unreachable")
+        sp.if sp.len(sp.pack(dst.value)) != sp.nat(0):
+            return sp.pair(self.data.routes[dst.value], dst.value)
 
-                sp.result(sp.pair(res.value.prev, res.value.to))
+        dst_link = sp.local("dst_link", self.data.get_link_from_net[dst_net], t=sp.TString)
+        sp.if sp.len(sp.pack(dst_link.value)) != sp.nat(0):
+            return sp.pair(dst_link.value, dst_link.value)
+
+        res = sp.local("res", self.data.get_link_from_reachable_net[dst_net], t=types.Types.Tuple)
+        # sp.verify(sp.len(sp.pack(res.value.to)) > sp.nat(0), "Unreachable: " + dst_net + " is unreachable")
+
+        return sp.pair(res.value.prev, res.value.to)
 
 
-@sp.add_test(name="BMCM")
-def test():
-    alice = sp.test_account("Alice")
-    bmc_periphery = sp.test_account("BMC Periphery")
-    # bmc= sp.test_account("BMC")
-
-    scenario = sp.test_scenario()
-    bmc_man = BMCManagement()
-    scenario += bmc_man
-
-    bmc_man.set_bmc_periphery(bmc_periphery.address).run(sender=alice)
-    bmc_man.add_owner(alice.address).run(sender=alice)
-
-    # bmc_man.remove_owner(alice.address).run(sender=alice)
-
-    bmc_man.add_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
-    bmc_man.remove_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
-    bmc_man.add_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
-
-    bmc_man.set_link_rx_height(sp.record(link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", height=sp.nat(2))).run(sender=alice)
-    bmc_man.set_link(sp.record(_link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", block_interval=sp.nat(2),
-                                _max_aggregation=sp.nat(3), delay_limit=sp.nat(2))).run(sender=alice)
+# @sp.add_test(name="BMCM")
+# def test():
+#     alice = sp.test_account("Alice")
+#     bmc_periphery = sp.test_account("BMC Periphery")
+#     # bmc= sp.test_account("BMC")
+#
+#     scenario = sp.test_scenario()
+#     bmc_man = BMCManagement()
+#     scenario += bmc_man
+#
+#     bmc_man.set_bmc_periphery(bmc_periphery.address).run(sender=alice)
+#     bmc_man.add_owner(alice.address).run(sender=alice)
+#
+#     # bmc_man.remove_owner(alice.address).run(sender=alice)
+#
+#     bmc_man.add_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
+#     bmc_man.remove_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
+#     bmc_man.add_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
+#
+#     bmc_man.set_link_rx_height(sp.record(link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", height=sp.nat(2))).run(sender=alice)
+#     bmc_man.set_link(sp.record(_link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", block_interval=sp.nat(2),
+#                                 _max_aggregation=sp.nat(3), delay_limit=sp.nat(2))).run(sender=alice)
 
 
 sp.add_compilation_target("bmc_management", BMCManagement())

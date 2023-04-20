@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@smartpy/smartml": "^0.12.0"
+  }
+}

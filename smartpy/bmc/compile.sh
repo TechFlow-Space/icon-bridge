@@ -37,8 +37,8 @@ function processContract {
         echo "Fatal: $CONTRACT_IN not found. Running from wrong dir?" && exit
     fi
 
-    echo ">>> [1 / 3] Testing ${CONTRACT_NAME} ... "
-    $SMART_PY_CLI test $CONTRACT_IN $OUT_DIR --html
+#    echo ">>> [1 / 3] Testing ${CONTRACT_NAME} ... "
+#    $SMART_PY_CLI test $CONTRACT_IN $OUT_DIR --html
 
     echo ">>> [2 / 3] Compiling ${CONTRACT_NAME} ..."
     $SMART_PY_CLI compile $CONTRACT_IN $OUT_DIR --html

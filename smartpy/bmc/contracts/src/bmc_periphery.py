@@ -119,32 +119,30 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.for i in sp.range(sp.nat(0), sp.len(rps)):
             sp.trace("ll")
             with sp.if_(rps[i].height < rx_height.value):
-                sp.trace("ggg")
-                # sp.continue
-
-            rx_height.value = rps[i].height
-            sp.for j in sp.range(sp.nat(0), sp.len(rps[i].events)):
-                ev.value = rps[i].events[j]
-                sp.verify(ev.value.next_bmc == self.data.bmc_btp_address.open_some("Address not set"), "Invalid Next BMC")
-                rx_seq.value +=sp.nat(1)
-                sp.if ev.value.seq < rx_seq.value:
-                    rx_seq.value = sp.as_nat(rx_seq.value-sp.nat(1))
-                    # sp.continue
-
-                sp.if ev.value.seq > rx_seq.value:
-                    sp.failwith(self.BMCRevertInvalidSeqNumber)
-
-                _decoded = self.decode_bmc_message(ev.value.message)
-                bmc_msg.value = _decoded
-
-                sp.if bmc_msg.value.src != "":
-                    with sp.if_(bmc_msg.value.dst == self.data.bmc_btp_address.open_some("Address not set")):
-                        self._handle_message(prev, bmc_msg.value)
+               pass
+            with sp.else_():
+                rx_height.value = rps[i].height
+                sp.for j in sp.range(sp.nat(0), sp.len(rps[i].events)):
+                    ev.value = rps[i].events[j]
+                    sp.verify(ev.value.next_bmc == self.data.bmc_btp_address.open_some("Address not set"), "Invalid Next BMC")
+                    rx_seq.value +=sp.nat(1)
+                    sp.if ev.value.seq < rx_seq.value:
+                        rx_seq.value = sp.as_nat(rx_seq.value-sp.nat(1))
                     with sp.else_():
-                        net, addr = sp.match_pair(strings.split_btp_address(bmc_msg.value.dst, "prev_idx", "result", "my_list", "last", "penultimate"))
-                        # resolve route inside try catch
-                        next_link, prev_link = sp.match_pair(sp.view("resolve_route", self.data.bmc_management, net, t=sp.TPair(sp.TString, sp.TString)).open_some("Invalid Call"))
-                        self._send_message(next_link, ev.value.message)
+                        sp.if ev.value.seq > rx_seq.value:
+                            sp.failwith(self.BMCRevertInvalidSeqNumber)
+
+                        _decoded = self.decode_bmc_message(ev.value.message)
+                        bmc_msg.value = _decoded
+
+                        sp.if bmc_msg.value.src != "":
+                            with sp.if_(bmc_msg.value.dst == self.data.bmc_btp_address.open_some("Address not set")):
+                                self._handle_message(prev, bmc_msg.value)
+                            with sp.else_():
+                                net, addr = sp.match_pair(strings.split_btp_address(bmc_msg.value.dst, "prev_idx", "result", "my_list", "last", "penultimate"))
+                                # resolve route inside try catch
+                                next_link, prev_link = sp.match_pair(sp.view("resolve_route", self.data.bmc_management, net, t=sp.TPair(sp.TString, sp.TString)).open_some("Invalid Call"))
+                                self._send_message(next_link, ev.value.message)
 
         # call update_link_rx_seq on BMCManagement
         update_link_rx_seq_args_type = sp.TRecord(prev=sp.TString, val=sp.TNat)
@@ -209,9 +207,9 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                     check = sp.local("check", False)
                     sp.if link.is_connected:
                         sp.for e in link.reachable.elements():
-                            sp.if to == e:
-                                check.value = True
-                                # sp.break
+                            sp.if check.value == False:
+                                sp.if to == e:
+                                    check.value = True
 
                         sp.if check.value == False:
                             links = sp.list([to], t=sp.TString)

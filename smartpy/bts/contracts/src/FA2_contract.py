@@ -53,14 +53,15 @@ class SingleAssetToken(FA2.Admin, FA2.Fa2SingleAsset, FA2.MintSingleAsset, FA2.B
         sp.result(self.data.allowances.get(allowance, default_value=0))
 
     @sp.entry_point
-    def transfer(self, batch):
+    def transfer_bts(self, batch):
         """Accept a list of transfer operations between a source and multiple
         destinations.
-        Custom version with allowance system.
+        Custom version with allowance system with callback implementation.
 
         `transfer_tx_` must be defined in the child class.
         """
         sp.set_type(batch, t_transfer_params)
+        sp.verify(sp.sender == self.data.administrator, "Unauthorized")
 
         if self.policy.supports_transfer:
             with sp.for_("transfer", batch) as transfer:
@@ -84,6 +85,29 @@ class SingleAssetToken(FA2.Admin, FA2.Fa2SingleAsset, FA2.MintSingleAsset, FA2.B
                     return_value = sp.record(string=sp.some("FA2_TX_DENIED"), requester=tx.to_,
                                              coin_name=transfer.coin_name, value=tx.amount)
                     sp.transfer(return_value, sp.tez(0), transfer.callback)
+
+    @sp.entry_point
+    def transfer(self, batch):
+        """Accept a list of transfer operations between a source and multiple
+        destinations.
+        Custom version with allowance system.
+        `transfer_tx_` must be defined in the child class.
+        """
+        sp.set_type(batch, FA2.t_transfer_params)
+        if self.policy.supports_transfer:
+            with sp.for_("transfer", batch) as transfer:
+                with sp.for_("tx", transfer.txs) as tx:
+                    # The ordering of sp.verify is important: 1) token_undefined, 2) transfer permission 3) balance
+                    sp.verify(self.is_defined(tx.token_id), "FA2_TOKEN_UNDEFINED")
+                    self.policy.check_tx_transfer_permissions(
+                        self, transfer.from_, tx.to_, tx.token_id
+                    )
+                    with sp.if_(sp.sender != transfer.from_):
+                        self.update_allowance_(sp.sender, transfer.from_, tx.token_id, tx.amount)
+                    with sp.if_(tx.amount > 0):
+                        self.transfer_tx_(transfer.from_, tx)
+        else:
+            sp.failwith("FA2_TX_DENIED")
 
     def update_allowance_(self, spender, owner, token_id, amount):
         allowance = sp.record(spender=spender, owner=owner)

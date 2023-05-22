@@ -622,7 +622,7 @@ class BTSCore(sp.Contract):
                         txs=sp.TList(sp.TRecord(to_=sp.TAddress, token_id=sp.TNat, amount=sp.TNat).layout(("to_", ("token_id", "amount"))))
                                                              ).layout((("from_", "coin_name"), ("callback", "txs"))))
                     transfer_entry_point = sp.contract(transfer_args_type, self.data.coins[coin_name],
-                                                       "transfer").open_some()
+                                                       "transfer_bts").open_some()
                     transfer_args = [
                         sp.record(callback=sp.self_entry_point("callback"), from_=sp.self_address, coin_name=coin_name, txs=[sp.record(to_=requester, token_id=sp.nat(0), amount=value)])]
                     sp.transfer(transfer_args, sp.tez(0), transfer_entry_point)

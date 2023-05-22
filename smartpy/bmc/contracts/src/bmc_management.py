@@ -193,11 +193,11 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
         )
 
         self._propagate_internal("Link", link)
-        links = self.data.list_link_names
+        links = sp.compute(self.data.list_link_names.elements())
 
         self.data.list_link_names.add(link)
         self.data.get_link_from_net[net] = link
-        self._send_internal(link, "Init", links.elements())
+        self._send_internal(link, "Init", links)
         sp.trace("in add_link")
 
     @sp.entry_point
@@ -508,11 +508,14 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
         self.data.links[prev].rx_seq += val
 
     @sp.entry_point
-    def update_link_tx_seq(self, prev):
+    def update_link_tx_seq(self, prev, serialized_msg):
         sp.set_type(prev, sp.TString)
+        sp.set_type(serialized_msg, sp.TBytes)
 
         self.only_bmc_periphery()
         self.data.links[prev].tx_seq += sp.nat(1)
+
+        sp.emit(sp.record(next=prev, seq=self.data.links.get(prev).tx_seq, msg=serialized_msg), tag="Message")
 
     @sp.entry_point
     def update_link_rx_height(self, prev, val):

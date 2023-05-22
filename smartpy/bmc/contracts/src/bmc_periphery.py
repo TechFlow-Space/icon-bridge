@@ -288,13 +288,10 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.set_type(serialized_msg, sp.TBytes)
 
         # call update_link_tx_seq on BMCManagement
-        update_link_tx_seq_entry_point = sp.contract(sp.TString,
+        update_link_tx_seq_entry_point = sp.contract(sp.TRecord(prev=sp.TString, serialized_msg=sp.TBytes),
                                                      self.data.bmc_management,
                                                      "update_link_tx_seq").open_some()
-        sp.transfer(to, sp.tez(0), update_link_tx_seq_entry_point)
-
-        sp.emit(sp.record(next=to, seq=sp.view("get_link_tx_seq", self.data.bmc_management, to, t=sp.TNat).open_some(), msg=serialized_msg),
-                tag="Message")
+        sp.transfer(sp.record(prev=to, serialized_msg=serialized_msg), sp.tez(0), update_link_tx_seq_entry_point)
 
     def _send_error(self, prev, message, err_code, err_msg):
         sp.set_type(prev, sp.TString)

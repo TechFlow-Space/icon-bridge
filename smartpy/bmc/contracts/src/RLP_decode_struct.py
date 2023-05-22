@@ -5,7 +5,7 @@ types = sp.io.import_script_from_url("file:./contracts/src/Types.py")
 
 # contract address to deal with negative values
 #TODO: change to mainnet address
-HELPER_CONTRACT_ADDRESS = sp.address("KT1W6dU9xpKwMwHXopVhW5PB1NdZFmVZPKbK")
+HELPER_CONTRACT_ADDRESS = sp.address("KT1DHptHqSovffZ7qqvSM9dy6uZZ8juV88gP")
 
 class DecodeLibrary:
 

@@ -55,6 +55,10 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
     def get_bmc_btp_address(self):
         sp.result(self.data.bmc_btp_address.open_some("Address not set"))
 
+    @sp.onchain_view()
+    def get_bmc_btp_address(self):
+        sp.result(self.data.bmc_management)
+
     def _require_registered_relay(self, prev):
         sp.set_type(prev, sp.TString)
 
@@ -66,7 +70,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.verify(valid.value, self.BMCRevertUnauthorized)
 
     @sp.entry_point
-    def callback(self, string, bsh_addr, prev, callback_msg):
+    def callback_btp_message(self, string, bsh_addr, prev, callback_msg):
         sp.set_type(string, sp.TOption(sp.TString))
         sp.set_type(bsh_addr, sp.TAddress)
         sp.set_type(prev, sp.TString)
@@ -117,7 +121,6 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         ev = sp.local("ev", sp.record(next_bmc="", seq=sp.nat(0), message=sp.bytes("0x")), t=types.Types.MessageEvent)
 
         sp.for i in sp.range(sp.nat(0), sp.len(rps)):
-            sp.trace("ll")
             with sp.if_(rps[i].height < rx_height.value):
                pass
             with sp.else_():
@@ -126,7 +129,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                     ev.value = rps[i].events[j]
                     sp.verify(ev.value.next_bmc == self.data.bmc_btp_address.open_some("Address not set"), "Invalid Next BMC")
                     rx_seq.value +=sp.nat(1)
-                    sp.if ev.value.seq < rx_seq.value:
+                    with sp.if_(ev.value.seq < rx_seq.value):
                         rx_seq.value = sp.as_nat(rx_seq.value-sp.nat(1))
                     with sp.else_():
                         sp.if ev.value.seq > rx_seq.value:
@@ -265,7 +268,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                     handle_btp_message_entry_point = sp.contract(handle_btp_message_args_type,
                                                                     bsh_addr,
                                                                     "handle_btp_message").open_some()
-                    handle_btp_message_args = sp.record(callback=sp.self_entry_point("callback"), bsh_addr=bsh_addr, prev=prev, callback_msg=msg, _from=net, svc=msg.svc, sn=msg.sn, msg=msg.message)
+                    handle_btp_message_args = sp.record(callback=sp.self_entry_point("callback_btp_message"), bsh_addr=bsh_addr, prev=prev, callback_msg=msg, _from=net, svc=msg.svc, sn=msg.sn, msg=msg.message)
                     sp.transfer(handle_btp_message_args, sp.tez(0), handle_btp_message_entry_point)
 
                 with sp.else_():

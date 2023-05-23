@@ -198,7 +198,6 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
         self.data.list_link_names.add(link)
         self.data.get_link_from_net[net] = link
         self._send_internal(link, "Init", links)
-        sp.trace("in add_link")
 
     @sp.entry_point
     def remove_link(self, link):
@@ -219,7 +218,6 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
         net, addr= sp.match_pair(strings.split_btp_address(link, "prev_idx", "result", "my_list", "last", "penultimate"))
         del self.data.get_link_from_net[net]
         self.data.list_link_names.remove(link)
-        sp.trace("in remove_link")
 
     @sp.onchain_view()
     def get_links(self):
@@ -248,8 +246,6 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
             sp.failwith("NotExistsKey")
         sp.verify(height > sp.nat(0), "InvalidRxHeight")
         self.data.links[link].rx_height = height
-
-        sp.trace("in set_link_rx_height")
 
     @sp.entry_point
     def set_link(self, _link, block_interval, _max_aggregation, delay_limit):
@@ -297,7 +293,6 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
         # net, addr = sp.match_pair(strings.split_btp_address(_link))
 
         self.data.links[_link] = link
-        sp.trace("in set_links")
 
 
     def _propagate_internal(self, service_type, link):

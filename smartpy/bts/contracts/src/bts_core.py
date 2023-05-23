@@ -128,12 +128,10 @@ class BTSCore(sp.Contract):
         sp.verify(fee_numerator <= self.FEE_DENOMINATOR, message="InvalidSetting")
         sp.verify((fixed_fee >= sp.nat(0)) & (fee_numerator >= sp.nat(0)), message="LessThan0")
         with sp.if_(addr == self.ZERO_ADDRESS):
-            sp.trace("in register native")
             deployed_fa2 = sp.create_contract_operation(contract=FA2_contract.SingleAssetToken(admin=sp.self_address, metadata=metadata,
                                                               token_metadata=token_metadata
                                                               ))
             sp.operations().push(deployed_fa2.operation)
-            sp.trace(deployed_fa2.address)
             self.data.coins[name] = deployed_fa2.address
             self.data.coins_name.push(name)
             self.data.coins_address[deployed_fa2.address] = name

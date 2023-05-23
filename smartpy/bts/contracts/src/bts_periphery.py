@@ -354,7 +354,6 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             #     #     err_msg = "ErrorWhileMinting"
             # # with sp.else_():
             # err_msg = "InvalidAddress"
-            # sp.trace(err_msg)
             # self.send_response_message(types.Types.ServiceType.open_variant("REQUEST_COIN_TRANSFER"), _from, sn, err_msg, self.RC_ERR)
 
 
@@ -520,8 +519,6 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.set_type(sn, sp.TInt)
         sp.set_type(msg, sp.TString)
         sp.set_type(code, sp.TNat)
-
-        sp.trace("in send_response_message")
 
         send_message_args_type = sp.TRecord(
             to=sp.TString, svc=sp.TString, sn=sp.TInt, msg=sp.TBytes

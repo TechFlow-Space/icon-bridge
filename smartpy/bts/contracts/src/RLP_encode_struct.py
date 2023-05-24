@@ -9,8 +9,9 @@ class EncodeLibrary:
 
         encode_service_type = sp.view("encode_nat", self.data.helper, params.service_type_value, t=sp.TBytes).open_some()
         rlp_bytes_with_prefix = sp.view("encode_list", self.data.helper, [encode_service_type, params.data], t=sp.TBytes).open_some()
+        final_rlp_bytes_with_prefix = sp.view("with_length_prefix", self.data.helper, rlp_bytes_with_prefix, t=sp.TBytes).open_some()
 
-        return rlp_bytes_with_prefix
+        return final_rlp_bytes_with_prefix
 
 
     def encode_transfer_coin_msg(self, data):
@@ -28,5 +29,6 @@ class EncodeLibrary:
         from_addr_encoded = sp.view("encode_string", self.data.helper, data.from_addr, t=sp.TBytes).open_some()
         to_addr_encoded = sp.view("encode_string", self.data.helper, data.to, t=sp.TBytes).open_some()
         rlp.value = sp.view("encode_list", self.data.helper, [from_addr_encoded, to_addr_encoded, rlp.value], t=sp.TBytes).open_some()
+        final_rlp_bytes_with_prefix = sp.view("with_length_prefix", self.data.helper, rlp.value, t=sp.TBytes).open_some()
 
-        return rlp.value
+        return final_rlp_bytes_with_prefix

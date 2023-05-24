@@ -88,10 +88,7 @@ class DecodeLibrary:
             sp.if counter.value == 1:
                 rv2_byt.value = i.value
             counter.value = counter.value + 1
-        starts_with = sp.slice(temp_byt.value, 0, 2).open_some()
         sub_list = sp.local("sub_list", temp_byt.value)
-        sp.if starts_with == sp.bytes("0xb846"):
-            sub_list.value = sp.slice(temp_byt.value, 2, sp.as_nat(sp.len(temp_byt.value) - 2)).open_some()
         nsl_tcm = sp.local("nsl_bts_tcm", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
         with sp.if_(is_list_lambda):
@@ -107,8 +104,8 @@ class DecodeLibrary:
         rv_assets = sp.local("assets", {}, sp.TMap(sp.TNat, types.Types.Asset))
         sp.for x in new_sub_list.items():
             new_temp_byt.value = x.value
-            sp.if sp.slice(new_temp_byt.value, 0, 2).open_some() == sp.bytes("0xb846"):
-                new_temp_byt.value = sp.slice(new_temp_byt.value, 2, sp.as_nat(sp.len(new_temp_byt.value) - 2)).open_some()
+            # sp.if sp.slice(new_temp_byt.value, 0, 2).open_some() == sp.bytes("0xb846"):
+            #     new_temp_byt.value = sp.slice(new_temp_byt.value, 2, sp.as_nat(sp.len(new_temp_byt.value) - 2)).open_some()
             temp_byt = sp.local("tempByt2", sp.bytes("0x"))
             temp_int = sp.local("tempInt", sp.nat(0))
             counter.value = 0
@@ -158,10 +155,7 @@ class DecodeLibrary:
             sp.if counter.value == 1:
                 temp_byt.value = i.value
             counter.value = counter.value + 1
-        starts_with = sp.slice(temp_byt.value, 0, 2).open_some()
         sub_list = sp.local("sub_list", temp_byt.value)
-        sp.if starts_with == sp.bytes("0xb846"):
-            sub_list.value = sp.slice(temp_byt.value, 2, sp.as_nat(sp.len(temp_byt.value) - 2)).open_some()
         nsl_bm = sp.local("nsl_bts_bm", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
         with sp.if_(is_list_lambda):
@@ -177,8 +171,8 @@ class DecodeLibrary:
         rv_blacklist_address = sp.local("blacklist_data", {}, sp.TMap(sp.TNat, sp.TString))
         sp.for x in new_sub_list.items():
             new_temp_byt.value = x.value
-            sp.if sp.slice(new_temp_byt.value, 0, 2).open_some() == sp.bytes("0xb846"):
-                new_temp_byt.value = sp.slice(new_temp_byt.value, 2, sp.as_nat(sp.len(new_temp_byt.value) - 2)).open_some()
+            # sp.if sp.slice(new_temp_byt.value, 0, 2).open_some() == sp.bytes("0xb846"):
+            #     new_temp_byt.value = sp.slice(new_temp_byt.value, 2, sp.as_nat(sp.len(new_temp_byt.value) - 2)).open_some()
             counter.value = 0
             nsl2_bm = sp.local("nsl2_bts_bm", sp.map(tkey=sp.TNat))
             is_list_lambda = sp.view("is_list", self.data.helper, new_temp_byt.value,
@@ -227,10 +221,7 @@ class DecodeLibrary:
             sp.if counter.value == 2:
                 rv1_byt.value = i.value
             counter.value = counter.value + 1
-        starts_with = sp.slice(temp_byt.value, 0, 2).open_some()
         sub_list = sp.local("sub_list", temp_byt.value)
-        sp.if starts_with == sp.bytes("0xb846"):
-            sub_list.value = sp.slice(temp_byt.value, 2, sp.as_nat(sp.len(temp_byt.value) - 2)).open_some()
         nsl1_dtlm = sp.local("nsl1_bts_dtlm", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
         with sp.if_(is_list_lambda):

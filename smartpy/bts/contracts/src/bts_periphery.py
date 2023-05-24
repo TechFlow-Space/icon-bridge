@@ -603,6 +603,6 @@ def test():
 
 sp.add_compilation_target("bts_periphery", BTPPreiphery(bmc_address=sp.address("KT1UrLqhQHDC3mJw9BUrqsiix7JRbxTsvWJu"),
                                                         bts_core_address=sp.address("KT1JAippuMfS6Bso8DGmigmTdkgEZUxQxYyX"),
-                                                        helper_contract=sp.address("KT1Q5erZm7Pp8UJywK1nkiP8QPCRmyUotUMq"),
+                                                        helper_contract=sp.address("KT1XekcRZQFpaVCc2WS4Vrka35CejWYfDa7z"),
                                                         parse_address=sp.address("KT1EKPrSLWjWViZQogFgbc1QmztkR5UGXEWa"),
                                                         owner_address = sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP"))    )

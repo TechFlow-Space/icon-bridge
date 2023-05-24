@@ -141,7 +141,6 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                             with sp.if_(bmc_msg.value.dst == self.data.bmc_btp_address.open_some("Address not set")):
                                 self._handle_message(prev, bmc_msg.value)
                             with sp.else_():
-                                sp.failwith("else reverted")
                                 net, addr = sp.match_pair(strings.split_btp_address(bmc_msg.value.dst, "prev_idx", "result", "my_list", "last", "penultimate"))
                                 # resolve route inside try catch
                                 next_link, prev_link = sp.match_pair(sp.view("resolve_route", self.data.bmc_management, net, t=sp.TPair(sp.TString, sp.TString)).open_some("Invalid Call"))

@@ -21,9 +21,10 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
     BMCRevertUnknownHandleBTPError = sp.string("UnknownHandleBTPError")
     BMCRevertUnknownHandleBTPMessage = sp.string("UnknownHandleBTPMessage")
 
-    def __init__(self, bmc_management_addr, helper_contract, parse_address, owner_address):
+    def __init__(self, bmc_management_addr, helper_contract, helper2_contract, parse_address, owner_address):
         self.init(
             helper=helper_contract,
+            helper2=helper2_contract,
             bmc_btp_address=sp.none,
             bmc_management=bmc_management_addr,
             parse_contract=parse_address,
@@ -115,11 +116,9 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
         rx_seq = sp.local("rx_seq", link_rx_seq, t=sp.TNat)
         rx_height = sp.local("rx_height", link_rx_height, t=sp.TNat)
-
         rps = self.decode_receipt_proofs(msg)
         bmc_msg = sp.local("bmc_msg", sp.record(src="", dst="", svc="", sn=sp.int(0), message=sp.bytes("0x")), t=types.Types.BMCMessage)
         ev = sp.local("ev", sp.record(next_bmc="", seq=sp.nat(0), message=sp.bytes("0x")), t=types.Types.MessageEvent)
-
         sp.for i in sp.range(sp.nat(0), sp.len(rps)):
             with sp.if_(rps[i].height < rx_height.value):
                pass
@@ -142,11 +141,11 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                             with sp.if_(bmc_msg.value.dst == self.data.bmc_btp_address.open_some("Address not set")):
                                 self._handle_message(prev, bmc_msg.value)
                             with sp.else_():
+                                sp.failwith("else reverted")
                                 net, addr = sp.match_pair(strings.split_btp_address(bmc_msg.value.dst, "prev_idx", "result", "my_list", "last", "penultimate"))
                                 # resolve route inside try catch
                                 next_link, prev_link = sp.match_pair(sp.view("resolve_route", self.data.bmc_management, net, t=sp.TPair(sp.TString, sp.TString)).open_some("Invalid Call"))
                                 self._send_message(next_link, ev.value.message)
-
         # call update_link_rx_seq on BMCManagement
         update_link_rx_seq_args_type = sp.TRecord(prev=sp.TString, val=sp.TNat)
         update_link_rx_seq_entry_point = sp.contract(update_link_rx_seq_args_type,
@@ -170,6 +169,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                                                      "update_link_rx_height").open_some()
         update_link_rx_height_args = sp.record(prev=prev, val=sp.as_nat(rx_height.value - link_rx_height))
         sp.transfer(update_link_rx_height_args, sp.tez(0), update_link_rx_height_entry_point)
+
 
 
     def _handle_message(self, prev, msg):
@@ -370,12 +370,13 @@ def test():
     # bmc= sp.test_account("BMC")
 
     scenario = sp.test_scenario()
-    bmc = BMCPreiphery(bmc_management.address, helper.address, parse_contract.address, owner.address)
-    scenario += bmc
+    # bmc = BMCPreiphery(bmc_management.address, helper.address, parse_contract.address, owner.address)
+    # scenario += bmc
 
     # bmc.handle_relay_message(sp.record(prev="demo string", msg=sp.bytes("0x0dae11"))).run(sender=alice)
 
 sp.add_compilation_target("bmc_periphery", BMCPreiphery(bmc_management_addr=sp.address("KT1Uiycjx4iXdjKFfR2kAo2NUdEtQ6PmDX4Y"),
-                                                        helper_contract=sp.address("KT1Q5erZm7Pp8UJywK1nkiP8QPCRmyUotUMq"),
+                                                        helper_contract=sp.address("KT1XekcRZQFpaVCc2WS4Vrka35CejWYfDa7z"),
+                                                        helper2_contract=sp.address("KT1DHptHqSovffZ7qqvSM9dy6uZZ8juV88gP"),
                                                         parse_address=sp.address("KT1XgRyjQPfpfwNrvYYpgERpYpCrGh24aoPX"),
                                                         owner_address=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP")))

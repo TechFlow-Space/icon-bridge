@@ -623,8 +623,8 @@ def test():
     #
     # # bmc_man.set_link_rx_height(sp.record(link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", height=sp.nat(2))).run(sender=alice)
     # # bmc_man.set_link(sp.record(_link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", block_interval=sp.nat(2),
-    # #                             _max_aggregation=sp.nat(3), delay_limit=sp.nat(2))).run(sender=alice)
+    # #                          update_link_reachable   _max_aggregation=sp.nat(3), delay_limit=sp.nat(2))).run(sender=alice)
     #
     #
 sp.add_compilation_target("bmc_management", BMCManagement(owner_address=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP"),
-                                                          helper_contract=sp.address("KT1Q5erZm7Pp8UJywK1nkiP8QPCRmyUotUMq")))
+                                                          helper_contract=sp.address("KT1XekcRZQFpaVCc2WS4Vrka35CejWYfDa7z")))

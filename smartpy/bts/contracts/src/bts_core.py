@@ -734,10 +734,10 @@ def test():
 
 
 sp.add_compilation_target("bts_core", BTSCore(
-    owner_manager=sp.address("KT1DMB7Je79rfkYPn2bCVH2ujCxb3MDUZgNU"),
-    _native_coin_name="NativeCoin",
-    _fee_numerator=sp.nat(1000),
-    _fixed_fee=sp.nat(10)
+    owner_manager=sp.address("KT1MxuVecS7HRRRZrJM7juddJg1HZZ4SGA5B"),
+    _native_coin_name="btp-NetXnHfVqm9iesp.tezos-XTZ",
+    _fee_numerator=sp.nat(100),
+    _fixed_fee=sp.nat(450)
 ))
 
 

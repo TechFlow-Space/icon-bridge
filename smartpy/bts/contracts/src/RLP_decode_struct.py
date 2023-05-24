@@ -20,6 +20,10 @@ class DecodeLibrary:
         counter = sp.local("counter_response", 0)
         sp.for i in rlp_.items():
             sp.if counter.value == 0:
+                check_length = sp.view("prefix_length", self.data.helper, i.value, t=sp.TBytes).open_some()
+                with sp.if_(check_length > 0):
+                    i.value = sp.view("without_length_prefix", self.data.helper, i.value,
+                                      t=sp.TBytes).open_some()
                 temp_int.value = Utils2.Int.of_bytes(i.value)
             sp.if counter.value == 1:
                 temp_byt.value = i.value
@@ -42,6 +46,10 @@ class DecodeLibrary:
         counter = sp.local("counter", 0)
         sp.for i in rlp_.items():
             sp.if counter.value == 0:
+                check_length = sp.view("prefix_length", self.data.helper, i.value, t=sp.TBytes).open_some()
+                with sp.if_(check_length > 0):
+                    i.value = sp.view("without_length_prefix", self.data.helper, i.value,
+                                      t=sp.TBytes).open_some()
                 temp_int.value = Utils2.Int.of_bytes(i.value)
             sp.if counter.value == 1:
                 temp_byt.value = i.value
@@ -122,6 +130,10 @@ class DecodeLibrary:
             view_value = nsl3_tcm.value
             sp.for i in view_value.items():
                 sp.if counter.value == 1:
+                    check_length = sp.view("prefix_length", self.data.helper, i.value, t=sp.TBytes).open_some()
+                    with sp.if_ (check_length > 0):
+                        i.value = sp.view("without_length_prefix", self.data.helper, i.value,
+                                               t=sp.TBytes).open_some()
                     temp_int.value = Utils2.Int.of_bytes(i.value)
                 sp.if counter.value == 0:
                     temp_byt.value = i.value
@@ -188,6 +200,10 @@ class DecodeLibrary:
             sp.for j in _decode_list.items():
                 rv_blacklist_address.value[counter.value] = sp.view("decode_string", self.data.helper, j.value, t=sp.TString).open_some()
                 counter.value = counter.value + 1
+        check_length = sp.view("prefix_length", self.data.helper, rv1_byt.value, t=sp.TBytes).open_some()
+        with sp.if_(check_length > 0):
+            rv1_byt.value = sp.view("without_length_prefix", self.data.helper, rv1_byt.value,
+                              t=sp.TBytes).open_some()
         rv1 = Utils2.Int.of_bytes(rv1_byt.value)
         rv2 = sp.view("decode_string", self.data.helper, rv2_byt.value, t=sp.TString).open_some()
         _service_type = sp.local("_service_type_blacklist", sp.variant("", 10))
@@ -249,6 +265,10 @@ class DecodeLibrary:
                                     t=sp.TMap(sp.TNat, sp.TBytes)).open_some()
         new_sub_list1 = nsl_dtlm.value
         sp.for y in new_sub_list1.items():
+            check_length = sp.view("prefix_length", self.data.helper, y.value, t=sp.TBytes).open_some()
+            with sp.if_(check_length > 0):
+                y.value = sp.view("without_length_prefix", self.data.helper, y.value,
+                                  t=sp.TBytes).open_some()
             rv_limit.value[counter.value] = Utils2.Int.of_bytes(y.value)
         return sp.record(coin_name = rv_names.value, token_limit = rv_limit.value ,
                          net = sp.view("decode_string", self.data.helper, rv1_byt.value, t=sp.TString).open_some())

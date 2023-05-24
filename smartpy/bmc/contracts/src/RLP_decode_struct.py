@@ -224,7 +224,8 @@ class DecodeLibrary:
             sp.if counter.value == 0:
                 rv_int.value = Utils2.Int.of_bytes(i.value)
             sp.if counter.value == 2:
-                rv_int2.value =Utils2.Int.of_bytes(i.value)
+                wl_prefix = sp.view("without_length_prefix", self.data.helper, i.value, t=sp.TBytes).open_some()
+                rv_int2.value =Utils2.Int.of_bytes(wl_prefix)
             counter.value = counter.value + 1
 
         sub_list = sp.local("sub_list", temp_byt.value)

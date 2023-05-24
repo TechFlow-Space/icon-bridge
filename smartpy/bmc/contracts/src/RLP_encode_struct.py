@@ -1,7 +1,5 @@
 import smartpy as sp
 
-#TODO: change to mainnet address
-HELPER_CONTRACT_ADDRESS = sp.address("KT1DHptHqSovffZ7qqvSM9dy6uZZ8juV88gP")
 
 class EncodeLibrary:
     LIST_SHORT_START = sp.bytes("0xc0")
@@ -26,7 +24,7 @@ class EncodeLibrary:
         encode_src = sp.view("encode_string", self.data.helper, params.src, t=sp.TBytes).open_some()
         encode_dst = sp.view("encode_string", self.data.helper, params.dst, t=sp.TBytes).open_some()
         encode_svc = sp.view("encode_string", self.data.helper, params.svc, t=sp.TBytes).open_some()
-        encode_sn = sp.view("to_bytes", HELPER_CONTRACT_ADDRESS, params.sn, t=sp.TBytes).open_some()
+        encode_sn = sp.view("to_byte", self.data.helper2, params.sn, t=sp.TBytes).open_some()
 
         rlp_bytes_with_prefix = sp.view("encode_list", self.data.helper, [encode_src, encode_dst, encode_svc, encode_sn, params.message], t=sp.TBytes).open_some()
         return rlp_bytes_with_prefix

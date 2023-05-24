@@ -14,6 +14,12 @@ class Helper(sp.Contract):
         sp.result(decode_string(params))
 
     @sp.onchain_view()
+    def prefix_length(self, params):
+        sp.set_type(params, sp.TBytes)
+        prefix_length = sp.build_lambda(Utils.RLP.Decoder.prefix_length)
+        sp.result(prefix_length(params))
+
+    @sp.onchain_view()
     def decode_list(self, params):
         sp.set_type(params, sp.TBytes)
         decode_list = sp.build_lambda(Utils.RLP.Decoder.decode_list)

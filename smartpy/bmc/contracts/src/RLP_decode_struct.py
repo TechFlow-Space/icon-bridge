@@ -3,9 +3,6 @@ import smartpy as sp
 Utils2 = sp.io.import_script_from_url("https://raw.githubusercontent.com/RomarQ/tezos-sc-utils/main/smartpy/utils.py")
 types = sp.io.import_script_from_url("file:./contracts/src/Types.py")
 
-# contract address to deal with negative values
-#TODO: change to mainnet address
-HELPER_CONTRACT_ADDRESS = sp.address("KT1DHptHqSovffZ7qqvSM9dy6uZZ8juV88gP")
 
 class DecodeLibrary:
 
@@ -32,7 +29,7 @@ class DecodeLibrary:
                 temp_map_string["svc"] = sp.view("decode_string", self.data.helper, k.value, t=sp.TString).open_some()
             sp.if counter.value == 3:
                 sn_in_bytes = sp.view("without_length_prefix", self.data.helper, k.value, t=sp.TBytes).open_some()
-                temp_int.value = sp.view("to_int", HELPER_CONTRACT_ADDRESS, sn_in_bytes, t=sp.TInt).open_some()
+                temp_int.value = sp.view("to_int", self.data.helper2, sn_in_bytes, t=sp.TInt).open_some()
             sp.if counter.value == 4:
                 temp_byt.value = k.value
             counter.value = counter.value + 1
@@ -101,10 +98,7 @@ class DecodeLibrary:
                 temp_bytes.value = g.value
             counter.value = counter.value + 1
 
-        starts_with = sp.slice(temp_bytes.value, 0, 2).open_some()
         sub_list = sp.local("sub_list_init", temp_bytes.value)
-        sp.if starts_with == sp.bytes("0xb846"):
-            sub_list.value = sp.slice(temp_bytes.value, 2, sp.as_nat(sp.len(temp_bytes.value) - 2)).open_some()
         nsl_im = sp.local("nsl_im", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
         with sp.if_(is_list_lambda):
@@ -165,10 +159,7 @@ class DecodeLibrary:
             sp.if counter.value == 0:
                 temp_str.value = sp.view("decode_string", self.data.helper, c.value, t=sp.TString).open_some()
             counter.value = counter.value + 1
-        starts_with = sp.slice(temp_byt.value, 0, 2).open_some()
         sub_list = sp.local("sub_list", temp_byt.value)
-        sp.if starts_with == sp.bytes("0xb846"):
-            sub_list.value = sp.slice(temp_byt.value, 2, sp.as_nat(sp.len(temp_byt.value) - 2)).open_some()
         nsl_gm = sp.local("nsl_gm", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
         with sp.if_(is_list_lambda):
@@ -236,10 +227,7 @@ class DecodeLibrary:
                 rv_int2.value =Utils2.Int.of_bytes(i.value)
             counter.value = counter.value + 1
 
-        starts_with = sp.slice(temp_byt.value, 0, 2).open_some()
         sub_list = sp.local("sub_list", temp_byt.value)
-        sp.if starts_with == sp.bytes("0xb846"):
-            sub_list.value = sp.slice(temp_byt.value, 2, sp.as_nat(sp.len(temp_byt.value) - 2)).open_some()
 
         nsl_rp = sp.local("nsl_rp", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
@@ -284,10 +272,7 @@ class DecodeLibrary:
             sp.if counter.value == 0:
                 temp_byt.value = i.value
             counter.value = counter.value + 1
-        starts_with = sp.slice(temp_byt.value, 0, 2).open_some()
         sub_list = sp.local("sub_list_proofs", temp_byt.value)
-        sp.if starts_with == sp.bytes("0xb846"):
-            sub_list.value = sp.slice(temp_byt.value, 2, sp.as_nat(sp.len(temp_byt.value) - 2)).open_some()
 
         nsl_rps = sp.local("nsl_rps", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()

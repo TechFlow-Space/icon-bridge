@@ -27,7 +27,8 @@ class EncodeLibrary:
         encode_sn = sp.view("to_byte", self.data.helper2, params.sn, t=sp.TBytes).open_some()
 
         rlp_bytes_with_prefix = sp.view("encode_list", self.data.helper, [encode_src, encode_dst, encode_svc, encode_sn, params.message], t=sp.TBytes).open_some()
-        return rlp_bytes_with_prefix
+        final_rlp_bytes_with_prefix = sp.view("with_length_prefix", self.data.helper, rlp_bytes_with_prefix, t=sp.TBytes).open_some()
+        return final_rlp_bytes_with_prefix
 
     def encode_response(self, params):
         sp.set_type(params, sp.TRecord(code=sp.TNat, message=sp.TString))
@@ -36,4 +37,5 @@ class EncodeLibrary:
         encode_message = sp.view("encode_string", self.data.helper, params.message, t=sp.TBytes).open_some()
 
         rlp_bytes_with_prefix = sp.view("encode_list", self.data.helper, [encode_code, encode_message], t=sp.TBytes).open_some()
-        return rlp_bytes_with_prefix
+        final_rlp_bytes_with_prefix = sp.view("with_length_prefix", self.data.helper, rlp_bytes_with_prefix, t=sp.TBytes).open_some()
+        return final_rlp_bytes_with_prefix

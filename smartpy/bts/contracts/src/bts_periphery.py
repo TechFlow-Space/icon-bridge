@@ -11,16 +11,17 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
     RC_OK = sp.nat(0)
     RC_ERR = sp.nat(1)
+    UINT_CAP = sp.nat(115792089237316195423570985008687907853269984665640564039457584007913129639935)
 
     MAX_BATCH_SIZE = sp.nat(15)
 
-    def __init__(self, bmc_address, bts_core_address, helper_contract, parse_address, owner_address):
+    def __init__(self, bmc_address, bts_core_address, helper_contract, parse_address, native_coin_name, owner_address):
         self.update_initial_storage(
             bmc=bmc_address,
             owner=owner_address,
             bts_core=bts_core_address,
             blacklist=sp.map(tkey=sp.TAddress, tvalue=sp.TBool),
-            token_limit=sp.map(tkey=sp.TString, tvalue=sp.TNat),
+            token_limit=sp.map({native_coin_name : self.UINT_CAP}, tkey=sp.TString, tvalue=sp.TNat),
             requests=sp.big_map(tkey=sp.TInt, tvalue=types.Types.PendingTransferCoin),
             serial_no = sp.int(0),
             number_of_pending_requests = sp.nat(0),
@@ -576,7 +577,7 @@ def test():
     owner = sp.test_account("Owner")
 
     scenario = sp.test_scenario()
-    counter = BTPPreiphery(bmc.address, bts_core.address, helper.address, admin.address, owner.address)
+    counter = BTPPreiphery(bmc.address, bts_core.address, helper.address, admin.address, "NativeCoin", owner.address)
     scenario += counter
 
     # counter.add_to_blacklist({0:"tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW"}).run(sender=counter.address)
@@ -605,4 +606,5 @@ sp.add_compilation_target("bts_periphery", BTPPreiphery(bmc_address=sp.address("
                                                         bts_core_address=sp.address("KT1JAippuMfS6Bso8DGmigmTdkgEZUxQxYyX"),
                                                         helper_contract=sp.address("KT1XekcRZQFpaVCc2WS4Vrka35CejWYfDa7z"),
                                                         parse_address=sp.address("KT1EKPrSLWjWViZQogFgbc1QmztkR5UGXEWa"),
+                                                        native_coin_name="btp-NetXnHfVqm9iesp.tezos-XTZ",
                                                         owner_address = sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP"))    )

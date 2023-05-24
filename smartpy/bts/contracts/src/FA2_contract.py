@@ -157,7 +157,7 @@ def test():
 
 sp.add_compilation_target("FA2_contract",
                           SingleAssetToken(
-                              admin=sp.address("tz1VA29GwaSA814BVM7AzeqVzxztEjjxiMEc"),
+                              admin=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP"),
                               metadata=sp.utils.metadata_of_url(
                                   "ipfs://example"),
-                              token_metadata=FA2.make_metadata(name="Token Zero", decimals=1, symbol="Tok0")))
+                              token_metadata=FA2.make_metadata(name="NativeWrappedCoin", decimals=1000000, symbol="WTEZ")))

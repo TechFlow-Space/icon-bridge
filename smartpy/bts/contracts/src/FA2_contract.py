@@ -160,4 +160,4 @@ sp.add_compilation_target("FA2_contract",
                               admin=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP"),
                               metadata=sp.utils.metadata_of_url(
                                   "ipfs://example"),
-                              token_metadata=FA2.make_metadata(name="NativeWrappedCoin", decimals=1000000, symbol="WTEZ")))
+                              token_metadata=FA2.make_metadata(name="NativeWrappedCoin", decimals=6, symbol="WTEZ")))

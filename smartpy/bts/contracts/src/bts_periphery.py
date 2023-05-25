@@ -276,15 +276,15 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                 with sp.if_(parsed_addr != sp.address("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg")):
                     handle_request_call = self._handle_request_service(tc.to, tc.assets)
                     with sp.if_(handle_request_call == "success"):
-                        self.send_response_message(sp.variant("RESPONSE_HANDLE_SERVICE", 2), _from, sn, "", self.RC_OK)
+                        self.send_response_message(sp.variant("RESPONSE_HANDLE_SERVICE", 2), sp.nat(2), _from, sn, "", self.RC_OK)
                         sp.emit(sp.record(from_address=_from, to=parsed_addr, serial_no=self.data.serial_no, assets_details=tc.assets), tag="TransferReceived")
                     with sp.else_():
                         err_msg.value = "ErrorInHandleRequestService"
-                        self.send_response_message(sp.variant("RESPONSE_HANDLE_SERVICE", 2), _from, sn, err_msg.value,
+                        self.send_response_message(sp.variant("RESPONSE_HANDLE_SERVICE", 2), sp.nat(2), _from, sn, err_msg.value,
                                                    self.RC_ERR)
                 with sp.else_():
                     err_msg.value = "InvalidAddress"
-                    self.send_response_message(sp.variant("RESPONSE_HANDLE_SERVICE", 2), _from, sn, err_msg.value, self.RC_ERR)
+                    self.send_response_message(sp.variant("RESPONSE_HANDLE_SERVICE", 2), sp.nat(2), _from, sn, err_msg.value, self.RC_ERR)
 
             with arg.match("BLACKLIST_MESSAGE") as a2:
                 service_type_variant_match.value = True
@@ -298,21 +298,21 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
                         add_blacklist_call = self._add_to_blacklist(addresses)
                         with sp.if_(add_blacklist_call == "success"):
-                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), _from, sn, "AddedToBlacklist", self.RC_OK)
+                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), sp.nat(3), _from, sn, "AddedToBlacklist", self.RC_OK)
                         with sp.else_():
-                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), _from, sn, "ErrorAddToBlackList", self.RC_ERR)
+                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), sp.nat(3), _from, sn, "ErrorAddToBlackList", self.RC_ERR)
 
                     with b_agr.match("REMOVE_FROM_BLACKLIST") as b_val_2:
                         blacklist_service_called.value = True
 
                         remove_blacklist_call = self._remove_from_blacklist(addresses)
                         with sp.if_(remove_blacklist_call == "success"):
-                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), _from, sn, "RemovedFromBlacklist", self.RC_OK)
+                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), sp.nat(3), _from, sn, "RemovedFromBlacklist", self.RC_OK)
                         with sp.else_():
-                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), _from, sn, "ErrorRemoveFromBlackList", self.RC_ERR)
+                            self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), sp.nat(3), _from, sn, "ErrorRemoveFromBlackList", self.RC_ERR)
 
                 sp.if blacklist_service_called.value == False:
-                    self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), _from, sn, "BlacklistServiceTypeErr", self.RC_ERR)
+                    self.send_response_message(sp.variant("BLACKLIST_MESSAGE", 3), sp.nat(3), _from, sn, "BlacklistServiceTypeErr", self.RC_ERR)
 
             with arg.match("CHANGE_TOKEN_LIMIT") as a3:
                 service_type_variant_match.value = True
@@ -322,9 +322,9 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
                 set_limit_call = self._set_token_limit(coin_names, token_limits)
                 with sp.if_(set_limit_call == "success"):
-                    self.send_response_message(sp.variant("CHANGE_TOKEN_LIMIT", 4), _from, sn, "ChangeTokenLimit", self.RC_OK)
+                    self.send_response_message(sp.variant("CHANGE_TOKEN_LIMIT", 4), sp.nat(4), _from, sn, "ChangeTokenLimit", self.RC_OK)
                 with sp.else_():
-                    self.send_response_message(sp.variant("CHANGE_TOKEN_LIMIT", 4), _from, sn, "ErrorChangeTokenLimit", self.RC_ERR)
+                    self.send_response_message(sp.variant("CHANGE_TOKEN_LIMIT", 4), sp.nat(4), _from, sn, "ErrorChangeTokenLimit", self.RC_ERR)
 
             with arg.match("RESPONSE_HANDLE_SERVICE") as a4:
                 service_type_variant_match.value = True
@@ -337,7 +337,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                 sp.emit(sp.record(_from=_from, sn=sn), tag= "UnknownResponse")
 
         sp.if service_type_variant_match.value == False:
-            self.send_response_message(sp.variant("UNKNOWN_TYPE", 5), _from, sn, "Unknown",self.RC_ERR)
+            self.send_response_message(sp.variant("UNKNOWN_TYPE", 5), sp.nat(5), _from, sn, "Unknown",self.RC_ERR)
 
         return_value = sp.record(string=sp.some("success"), bsh_addr=bsh_addr, prev=prev,
                                  callback_msg=callback_msg)
@@ -505,10 +505,11 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             sp.transfer(mint_args, sp.tez(0), mint_args_type_entry_point)
 
 
-    def send_response_message(self, service_type, to, sn, msg, code):
+    def send_response_message(self, service_type, service_type_val, to, sn, msg, code):
         """
 
         :param service_type:
+        :param service_type_val: value of service_type variant
         :param to:
         :param sn:
         :param msg:
@@ -516,6 +517,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         :return:
         """
         sp.set_type(service_type, types.Types.ServiceType)
+        sp.set_type(service_type_val, sp.TNat)
         sp.set_type(to, sp.TString)
         sp.set_type(sn, sp.TInt)
         sp.set_type(msg, sp.TString)
@@ -526,7 +528,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         )
         send_message_entry_point = sp.contract(send_message_args_type, self.data.bmc, "send_message").open_some()
         send_message_args = sp.record(to=to, svc=self.service_name, sn=sn,
-                                      msg=sp.pack(sp.record(serviceType=service_type, data=sp.pack(sp.record(code=code, message=msg))))
+                                      msg=self.encode_service_message(sp.record(service_type_value=service_type_val, data=self.encode_response(sp.record(code=code, message=msg))))
                                       )
         sp.transfer(send_message_args, sp.tez(0), send_message_entry_point)
 
@@ -563,7 +565,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.set_type(params, sp.TRecord(coin_name=sp.TString, user=sp.TAddress, value=sp.TNat))
 
         sp.verify(self.data.blacklist.contains(params.user) == False, "Blacklisted")
-        sp.verify(self.data.token_limit.get(params.coin_name) >= params.value, "LimitExceed")
+        sp.verify(self.data.token_limit.get(params.coin_name, default_value=sp.nat(0)) >= params.value, "LimitExceed")
         sp.result(True)
 
 

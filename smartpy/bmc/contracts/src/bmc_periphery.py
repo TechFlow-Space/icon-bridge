@@ -375,7 +375,7 @@ def test():
     # bmc.handle_relay_message(sp.record(prev="demo string", msg=sp.bytes("0x0dae11"))).run(sender=alice)
 
 sp.add_compilation_target("bmc_periphery", BMCPreiphery(bmc_management_addr=sp.address("KT1Uiycjx4iXdjKFfR2kAo2NUdEtQ6PmDX4Y"),
-                                                        helper_contract=sp.address("KT1XekcRZQFpaVCc2WS4Vrka35CejWYfDa7z"),
+                                                        helper_contract=sp.address("KT1HwFJmndBWRn3CLbvhUjdupfEomdykL5a6"),
                                                         helper2_contract=sp.address("KT1DHptHqSovffZ7qqvSM9dy6uZZ8juV88gP"),
                                                         parse_address=sp.address("KT1XgRyjQPfpfwNrvYYpgERpYpCrGh24aoPX"),
                                                         owner_address=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP")))

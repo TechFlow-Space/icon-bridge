@@ -627,4 +627,4 @@ def test():
     #
     #
 sp.add_compilation_target("bmc_management", BMCManagement(owner_address=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP"),
-                                                          helper_contract=sp.address("KT1XekcRZQFpaVCc2WS4Vrka35CejWYfDa7z")))
+                                                          helper_contract=sp.address("KT1HwFJmndBWRn3CLbvhUjdupfEomdykL5a6")))

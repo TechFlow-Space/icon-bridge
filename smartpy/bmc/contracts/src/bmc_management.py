@@ -272,25 +272,12 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
 
         link = sp.local("link", self.data.links.get(_link), t=types.Types.Link).value
 
-        # not implemented
-        # scale = sp.local("scale", utils.get_scale(link.block_interval_src, link.block_interval_dst), t=sp.TNat)
-        # reset_rotate_height = sp.local("reset_rotate_height", True, t=sp.TBool)
-        # sp.if utils.get_rotate_term(link.max_aggregation, scale.value) == sp.nat(0):
-        #     reset_rotate_height.value = True
-
-        link.block_interval_src = block_interval
+        link.block_interval_dst = block_interval
         link.max_aggregation = _max_aggregation
         link.delay_limit = delay_limit
 
-        # not implemented
-        # scale.value = utils.get_scale(link.block_interval_src, block_interval)
-        # rotate_term = sp.local("rotate_term", utils.get_rotate_term(_max_aggregation, scale.value), t=sp.TNat)
-        # rotate_term = sp.local("rotate_term", sp.nat(6))
-
-        # sp.if reset_rotate_height.value & (rotate_term.value > sp.nat(0)):
         link.rotate_height = sp.level
         link.rx_height = sp.nat(0)
-        # net, addr = sp.match_pair(strings.split_btp_address(_link))
 
         self.data.links[_link] = link
 
@@ -546,10 +533,6 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
 
                 del self.data.get_link_from_reachable_net[net]
                 self.data.links[prev].reachable.remove(item)
-                # this is not needed when removing from set
-                # self.data.links[prev].reachable[index] = self.data.links[prev].reachable[
-                #     sp.as_nat(sp.len(self.data.links[prev].reachable) - 1)
-                # ]
             i.value += 1
 
     @sp.entry_point

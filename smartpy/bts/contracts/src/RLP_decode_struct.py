@@ -181,12 +181,13 @@ class DecodeLibrary:
         counter.value = 0
         new_temp_byt = sp.local("new_temp_byt", sp.bytes("0x"))
         rv_blacklist_address = sp.local("blacklist_data", {}, sp.TMap(sp.TNat, sp.TString))
+        addr_string = sp.local("addr_string", "")
+        nsl2_bm = sp.local("nsl2_bts_bm", sp.map(tkey=sp.TNat))
         sp.for x in new_sub_list.items():
             new_temp_byt.value = x.value
             # sp.if sp.slice(new_temp_byt.value, 0, 2).open_some() == sp.bytes("0xb846"):
             #     new_temp_byt.value = sp.slice(new_temp_byt.value, 2, sp.as_nat(sp.len(new_temp_byt.value) - 2)).open_some()
             counter.value = 0
-            nsl2_bm = sp.local("nsl2_bts_bm", sp.map(tkey=sp.TNat))
             is_list_lambda = sp.view("is_list", self.data.helper, new_temp_byt.value,
                                      t=sp.TBool).open_some()
             with sp.if_(is_list_lambda):
@@ -194,12 +195,12 @@ class DecodeLibrary:
                                          t=sp.TMap(sp.TNat, sp.TBytes)).open_some()
             with sp.else_():
                 decode_len = sp.view("without_length_prefix", self.data.helper, new_temp_byt.value, t=sp.TBytes).open_some()
-                nsl2_bm.value = sp.view("decode_list", self.data.helper, decode_len,
-                                         t=sp.TMap(sp.TNat, sp.TBytes)).open_some()
-            _decode_list = nsl2_bm.value
-            sp.for j in _decode_list.items():
-                rv_blacklist_address.value[counter.value] = sp.view("decode_string", self.data.helper, j.value, t=sp.TString).open_some()
-                counter.value = counter.value + 1
+                addr_string.value = sp.view("decode_string", self.data.helper, decode_len,
+                                         t=sp.TString).open_some()
+            # _decode_list = nsl2_bm.value
+            # sp.for j in _decode_list.items():
+            rv_blacklist_address.value[counter.value] = addr_string.value
+            counter.value = counter.value + 1
         check_length = sp.view("prefix_length", self.data.helper, rv1_byt.value, t=sp.TNat).open_some()
         with sp.if_(check_length > 0):
             rv1_byt.value = sp.view("without_length_prefix", self.data.helper, rv1_byt.value,
@@ -211,8 +212,7 @@ class DecodeLibrary:
             _service_type.value = sp.variant("ADD_TO_BLACKLIST", rv1)
         with sp.else_():
             _service_type.value = sp.variant("REMOVE_FROM_BLACKLIST", rv1)
-        return sp.record(serviceType = _service_type.value , addrs = rv_blacklist_address.value ,
-                         net = sp.view("decode_string", self.data.helper, rv2, t=sp.TString).open_some())
+        return sp.record(serviceType = _service_type.value , addrs = rv_blacklist_address.value , net = rv2)
 
     def decode_token_limit_msg(self, rlp):
         rlp_tlm = sp.local("rlp_tlm_bts", sp.map(tkey=sp.TNat))

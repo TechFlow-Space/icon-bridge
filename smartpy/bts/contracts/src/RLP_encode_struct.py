@@ -43,4 +43,5 @@ class EncodeLibrary:
 
         rlp_bytes_with_prefix = sp.view("encode_list", self.data.helper, [encode_code, encode_message],
                                         t=sp.TBytes).open_some()
-        return rlp_bytes_with_prefix
+        final_rlp_bytes_with_prefix = sp.view("with_length_prefix", self.data.helper, rlp_bytes_with_prefix, t=sp.TBytes).open_some()
+        return final_rlp_bytes_with_prefix

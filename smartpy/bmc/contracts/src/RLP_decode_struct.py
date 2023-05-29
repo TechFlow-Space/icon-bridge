@@ -29,7 +29,7 @@ class DecodeLibrary:
                 temp_map_string["svc"] = sp.view("decode_string", self.data.helper, k.value, t=sp.TString).open_some()
             sp.if counter.value == 3:
                 sn_in_bytes = sp.view("without_length_prefix", self.data.helper, k.value, t=sp.TBytes).open_some()
-                temp_int.value = sp.view("to_int", self.data.helper2, sn_in_bytes, t=sp.TInt).open_some()
+                temp_int.value = sp.view("to_int", self.data.helper_parse_negative, sn_in_bytes, t=sp.TInt).open_some()
             sp.if counter.value == 4:
                 temp_byt.value = k.value
             counter.value = counter.value + 1

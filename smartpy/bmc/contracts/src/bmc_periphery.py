@@ -21,10 +21,10 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
     BMCRevertUnknownHandleBTPError = sp.string("UnknownHandleBTPError")
     BMCRevertUnknownHandleBTPMessage = sp.string("UnknownHandleBTPMessage")
 
-    def __init__(self, bmc_management_addr, helper_contract, helper2_contract, parse_address, owner_address):
+    def __init__(self, bmc_management_addr, helper_contract, helper_parse_neg_contract, parse_address, owner_address):
         self.init(
             helper=helper_contract,
-            helper2=helper2_contract,
+            helper_parse_negative=helper_parse_neg_contract,
             bmc_btp_address=sp.none,
             bmc_management=bmc_management_addr,
             parse_contract=parse_address,
@@ -35,6 +35,24 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
     def only_owner(self):
         sp.verify(sp.sender == self.data.owner_address, "Unauthorized")
+
+    @sp.entry_point
+    def set_helper_address(self, address):
+        sp.set_type(address, sp.TAddress)
+        self.only_owner()
+        self.data.helper = address
+
+    @sp.entry_point
+    def set_helper_parse_negative_address(self, address):
+        sp.set_type(address, sp.TAddress)
+        self.only_owner()
+        self.data.helper_parse_negative = address
+
+    @sp.entry_point
+    def set_parse_address(self, address):
+        sp.set_type(address, sp.TAddress)
+        self.only_owner()
+        self.data.parse_contract = address
 
     @sp.entry_point
     def set_bmc_management_addr(self, params):
@@ -57,7 +75,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.result(self.data.bmc_btp_address.open_some("Address not set"))
 
     @sp.onchain_view()
-    def get_bmc_btp_address(self):
+    def get_bmc_management_address(self):
         sp.result(self.data.bmc_management)
 
     def _require_registered_relay(self, prev):
@@ -376,6 +394,6 @@ def test():
 
 sp.add_compilation_target("bmc_periphery", BMCPreiphery(bmc_management_addr=sp.address("KT1Uiycjx4iXdjKFfR2kAo2NUdEtQ6PmDX4Y"),
                                                         helper_contract=sp.address("KT1HwFJmndBWRn3CLbvhUjdupfEomdykL5a6"),
-                                                        helper2_contract=sp.address("KT1DHptHqSovffZ7qqvSM9dy6uZZ8juV88gP"),
+                                                        helper_parse_neg_contract=sp.address("KT1DHptHqSovffZ7qqvSM9dy6uZZ8juV88gP"),
                                                         parse_address=sp.address("KT1XgRyjQPfpfwNrvYYpgERpYpCrGh24aoPX"),
                                                         owner_address=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP")))

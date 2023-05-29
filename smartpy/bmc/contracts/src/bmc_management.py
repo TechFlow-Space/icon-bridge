@@ -62,6 +62,12 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
         sp.verify(sp.sender == self.data.bmc_periphery.open_some("BMCAddressNotSet"), "Unauthorized")
 
     @sp.entry_point
+    def set_helper_address(self, address):
+        sp.set_type(address, sp.TAddress)
+        self.only_owner()
+        self.data.helper = address
+
+    @sp.entry_point
     def set_bmc_periphery(self, addr):
         """
 

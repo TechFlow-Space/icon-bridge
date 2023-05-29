@@ -200,10 +200,10 @@ class DecodeLibrary:
             sp.for j in _decode_list.items():
                 rv_blacklist_address.value[counter.value] = sp.view("decode_string", self.data.helper, j.value, t=sp.TString).open_some()
                 counter.value = counter.value + 1
-        # check_length = sp.view("prefix_length", self.data.helper, rv1_byt.value, t=sp.TNat).open_some()
-        # with sp.if_(check_length > 0):
-        #     rv1_byt.value = sp.view("without_length_prefix", self.data.helper, rv1_byt.value,
-        #                       t=sp.TBytes).open_some()
+        check_length = sp.view("prefix_length", self.data.helper, rv1_byt.value, t=sp.TNat).open_some()
+        with sp.if_(check_length > 0):
+            rv1_byt.value = sp.view("without_length_prefix", self.data.helper, rv1_byt.value,
+                              t=sp.TBytes).open_some()
         rv1 = Utils2.Int.of_bytes(rv1_byt.value)
         rv2 = sp.view("decode_string", self.data.helper, rv2_byt.value, t=sp.TString).open_some()
         _service_type = sp.local("_service_type_blacklist", sp.variant("", 10))
@@ -238,6 +238,7 @@ class DecodeLibrary:
                 rv1_byt.value = i.value
             counter.value = counter.value + 1
         sub_list = sp.local("sub_list", temp_byt.value)
+        sub_list_limit = sp.local("sub_list_limit", temp_byt1.value)
         nsl1_dtlm = sp.local("nsl1_bts_dtlm", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
         with sp.if_(is_list_lambda):
@@ -253,22 +254,25 @@ class DecodeLibrary:
         rv_limit = sp.local("limit", {}, sp.TMap(sp.TNat, sp.TNat))
         sp.for x in new_sub_list.items():
             rv_names.value[counter.value] = sp.view("decode_string", self.data.helper, x.value, t=sp.TString).open_some()
-
+            counter.value += 1
         nsl_dtlm = sp.local("nsl_bts_dtlm", sp.map(tkey=sp.TNat))
         is_list_lambda = sp.view("is_list", self.data.helper, sub_list.value, t=sp.TBool).open_some()
+        counter.value = 0
         with sp.if_(is_list_lambda):
-            nsl_dtlm.value = sp.view("decode_list", self.data.helper, sub_list.value,
+            nsl_dtlm.value = sp.view("decode_list", self.data.helper, sub_list_limit.value,
                                     t=sp.TMap(sp.TNat, sp.TBytes)).open_some()
         with sp.else_():
-            decode_len = sp.view("without_length_prefix", self.data.helper, sub_list.value, t=sp.TBytes).open_some()
+            decode_len = sp.view("without_length_prefix", self.data.helper, sub_list_limit.value, t=sp.TBytes).open_some()
             nsl_dtlm.value = sp.view("decode_list", self.data.helper, decode_len,
                                     t=sp.TMap(sp.TNat, sp.TBytes)).open_some()
         new_sub_list1 = nsl_dtlm.value
+        limit = sp.local("limit_val", sp.bytes("0x"), t=sp.TBytes)
         sp.for y in new_sub_list1.items():
-            # check_length = sp.view("prefix_length", self.data.helper, y.value, t=sp.TNat).open_some()
-            # with sp.if_(check_length > 0):
-            #     y.value = sp.view("without_length_prefix", self.data.helper, y.value,
-            #                       t=sp.TBytes).open_some()
-            rv_limit.value[counter.value] = Utils2.Int.of_bytes(y.value)
+            check_length = sp.view("prefix_length", self.data.helper, y.value, t=sp.TNat).open_some()
+            with sp.if_(check_length > 0):
+                limit.value = sp.view("without_length_prefix", self.data.helper, y.value,
+                                  t=sp.TBytes).open_some()
+            rv_limit.value[counter.value] = Utils2.Int.of_bytes(limit.value)
+            counter.value += 1
         return sp.record(coin_name = rv_names.value, token_limit = rv_limit.value ,
                          net = sp.view("decode_string", self.data.helper, rv1_byt.value, t=sp.TString).open_some())

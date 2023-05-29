@@ -40,6 +40,18 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.verify(sp.sender == self.data.bts_core, "Unauthorized")
 
     @sp.entry_point
+    def set_helper_address(self, address):
+        sp.set_type(address, sp.TAddress)
+        self.only_owner()
+        self.data.helper = address
+
+    @sp.entry_point
+    def set_parse_address(self, address):
+        sp.set_type(address, sp.TAddress)
+        self.only_owner()
+        self.data.parse_contract = address
+
+    @sp.entry_point
     def set_bmc_address(self, params):
         sp.set_type(params, sp.TAddress)
         self.only_owner()

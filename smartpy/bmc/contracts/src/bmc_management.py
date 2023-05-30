@@ -565,9 +565,11 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
                 sp.result(sp.pair(dst_link.value, dst_link.value))
             with sp.else_():
                 res = sp.local("res", self.data.get_link_from_reachable_net.get(dst_net), t=types.Types.Tuple)
-                sp.verify(sp.len(sp.pack(res.value.to)) > sp.nat(0), "Unreachable: " + dst_net + " is unreachable")
-
-                sp.result(sp.pair(res.value.prev, res.value.to))
+                # sp.verify(sp.len(sp.pack(res.value.to)) > sp.nat(0), "Unreachable: " + dst_net + " is unreachable")
+                with sp.if_(sp.len(sp.pack(res.value.to)) > sp.nat(0)):
+                    sp.result(sp.pair(res.value.prev, res.value.to))
+                with sp.else_():
+                    sp.result(sp.pair("Unreachable", "Unreachable: " + dst_net + " is unreachable"))
 
 
 @sp.add_test(name="BMCM")

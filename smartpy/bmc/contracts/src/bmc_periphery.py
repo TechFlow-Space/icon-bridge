@@ -30,6 +30,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             parse_contract=parse_address,
             handle_btp_message_status=sp.none,
             handle_btp_error_status=sp.none,
+            handle_fee_gathering_status=sp.none,
             owner_address = owner_address
         )
 
@@ -102,6 +103,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             pass
         with sp.else_():
             self._send_error(prev, callback_msg, self.BSH_ERR, self.BMCRevertUnknownHandleBTPMessage)
+        self.data.handle_btp_message_status = sp.none
 
     @sp.entry_point
     def callback_btp_error(self, string, bsh_addr, svc, sn, code, msg):
@@ -121,6 +123,18 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             error_code = self.UNKNOWN_ERR
             err_msg = self.BMCRevertUnknownHandleBTPError
             sp.emit(sp.record(svc=svc, sn=sn * -1, code=code, msg=msg, err_code=error_code, err_msg=err_msg), tag="ErrorOnBTPError")
+        self.data.handle_btp_error_status = sp.none
+
+    @sp.entry_point
+    def callback_handle_fee_gathering(self, string, bsh_addr):
+        sp.set_type(string, sp.TOption(sp.TString))
+        sp.set_type(bsh_addr, sp.TAddress)
+
+        sp.verify(sp.sender == bsh_addr, "Unauthorized")
+        self.data.handle_fee_gathering_status = string
+        with sp.if_(self.data.handle_fee_gathering_status.open_some() == "success"):
+            pass
+        self.data.handle_fee_gathering_status = sp.none
 
     @sp.entry_point
     def handle_relay_message(self, prev, msg):
@@ -160,9 +174,11 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                                 self._handle_message(prev, bmc_msg.value)
                             with sp.else_():
                                 net, addr = sp.match_pair(strings.split_btp_address(bmc_msg.value.dst, "prev_idx", "result", "my_list", "last", "penultimate"))
-                                # resolve route inside try catch
                                 next_link, prev_link = sp.match_pair(sp.view("resolve_route", self.data.bmc_management, net, t=sp.TPair(sp.TString, sp.TString)).open_some("Invalid Call"))
-                                self._send_message(next_link, ev.value.message)
+                                with sp.if_(next_link != "Unreachable"):
+                                    self._send_message(next_link, ev.value.message)
+                                with sp.else_():
+                                    self._send_error(prev, bmc_msg.value, self.BMC_ERR, "Unreachable_"+ net)
         # call update_link_rx_seq on BMCManagement
         update_link_rx_seq_args_type = sp.TRecord(prev=sp.TString, val=sp.TNat)
         update_link_rx_seq_entry_point = sp.contract(update_link_rx_seq_args_type,
@@ -213,11 +229,11 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
                             sp.if bsh_addr != sp.address("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg"):
                                 # call handle_fee_gathering of bts periphery
-                                handle_fee_gathering_args_type = sp.TRecord(fa=sp.TString, svc=sp.TString)
+                                handle_fee_gathering_args_type = sp.TRecord(callback=sp.TContract(sp.TRecord(string=sp.TOption(sp.TString), bsh_addr=sp.TAddress)), bsh_addr=sp.TAddress, fa=sp.TString, svc=sp.TString)
                                 handle_fee_gathering_entry_point = sp.contract(handle_fee_gathering_args_type,
                                                                                 bsh_addr,
                                                                                 "handle_fee_gathering").open_some()
-                                handle_fee_gathering_args = sp.record(fa=gather_fee.value.fa, svc=gather_fee.value.svcs[c])
+                                handle_fee_gathering_args = sp.record(callback=sp.self_entry_point("callback_handle_fee_gathering"), bsh_addr=bsh_addr, fa=gather_fee.value.fa, svc=gather_fee.value.svcs[c])
                                 sp.transfer(handle_fee_gathering_args, sp.tez(0), handle_fee_gathering_entry_point)
 
                 sp.if sm.value.serviceType == "Link":

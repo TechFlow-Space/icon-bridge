@@ -570,6 +570,7 @@ class BTSCore(sp.Contract):
                 self.data.balances.get(sp.record(address=requester, coin_name=coin_name),
                                        default_value=sp.record(locked_balance=sp.nat(0),refundable_balance=sp.nat(0))
                                        ).refundable_balance + value
+        self.data.transfer_status = sp.none
 
     @sp.entry_point
     def handle_response_service(self, requester, coin_name, value, fee, rsp_code):

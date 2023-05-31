@@ -183,11 +183,11 @@ class DecodeLibrary:
         rv_blacklist_address = sp.local("blacklist_data", {}, sp.TMap(sp.TNat, sp.TString))
         addr_string = sp.local("addr_string", "")
         nsl2_bm = sp.local("nsl2_bts_bm", sp.map(tkey=sp.TNat))
+        counter.value = 0
         sp.for x in new_sub_list.items():
             new_temp_byt.value = x.value
             # sp.if sp.slice(new_temp_byt.value, 0, 2).open_some() == sp.bytes("0xb846"):
             #     new_temp_byt.value = sp.slice(new_temp_byt.value, 2, sp.as_nat(sp.len(new_temp_byt.value) - 2)).open_some()
-            counter.value = 0
             is_list_lambda = sp.view("is_list", self.data.helper, new_temp_byt.value,
                                      t=sp.TBool).open_some()
             with sp.if_(is_list_lambda):

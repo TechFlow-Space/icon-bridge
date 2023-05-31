@@ -278,6 +278,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
         check_caller = self.only_bmc()
 
+        callback_string = sp.local("callback_string", "")
         with sp.if_((svc == self.service_name) & (check_caller == "Authorized")):
             err_msg = sp.local("error", "")
             sm = self.decode_service_message(msg)
@@ -286,6 +287,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             with sm.serviceType.match_cases() as arg:
                 with arg.match("REQUEST_COIN_TRANSFER") as a1:
                     service_type_variant_match.value = True
+                    callback_string.value = "success"
                     tc = self.decode_transfer_coin_msg(sm.data)
                     parsed_addr = sp.view("str_to_addr", self.data.parse_contract, tc.to, t=sp.TAddress).open_some()
 
@@ -304,6 +306,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
                 with arg.match("BLACKLIST_MESSAGE") as a2:
                     service_type_variant_match.value = True
+                    callback_string.value = "success"
                     bm = self.decode_blacklist_msg(sm.data)
                     addresses = bm.addrs
 
@@ -332,6 +335,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
                 with arg.match("CHANGE_TOKEN_LIMIT") as a3:
                     service_type_variant_match.value = True
+                    callback_string.value = "success"
                     tl = self.decode_token_limit_msg(sm.data)
                     coin_names = tl.coin_name
                     token_limits = tl.token_limit
@@ -344,39 +348,29 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
 
                 with arg.match("RESPONSE_HANDLE_SERVICE") as a4:
                     service_type_variant_match.value = True
-                    sp.verify(sp.len(sp.pack(self.data.requests.get(sn).from_)) != 0, "InvalidSN")
-                    response = self.decode_response(sm.data)
-                    self.handle_response_service(sn, response.code, response.message)
-
+                    with sp.if_(sp.len(sp.pack(self.data.requests.get(sn).from_)) != 0):
+                        response = self.decode_response(sm.data)
+                        handle_response = self.handle_response_service(sn, response.code, response.message)
+                        with sp.if_(handle_response == "success"):
+                            callback_string.value = "success"
+                        with sp.else_():
+                            callback_string.value = "fail"
+                    with sp.else_():
+                        callback_string.value = "InvalidSN"
                 with arg.match("UNKNOWN_TYPE") as a5:
                     service_type_variant_match.value = True
+                    callback_string.value = "success"
                     sp.emit(sp.record(_from=_from, sn=sn), tag= "UnknownResponse")
 
             sp.if service_type_variant_match.value == False:
+                callback_string.value = "success"
                 self.send_response_message(sp.variant("UNKNOWN_TYPE", 5), sp.nat(5), _from, sn, "Unknown",self.RC_ERR)
-
-            return_value = sp.record(string=sp.some("success"), bsh_addr=bsh_addr, prev=prev,
-                                     callback_msg=callback_msg)
-            sp.transfer(return_value, sp.tez(0), callback)
         with sp.else_():
-            return_value = sp.record(string=sp.some("fail"), bsh_addr=bsh_addr, prev=prev,
-                                     callback_msg=callback_msg)
-            sp.transfer(return_value, sp.tez(0), callback)
+            callback_string.value = "fail"
 
-        # using if else
-        # with sp.if_(sm.serviceType == types.Types.ServiceType.open_variant("REQUEST_COIN_TRANSFER")):
-            # tc = sp.unpack(sm.data, t=types.Types.TransferCoin)
-            # TDo: check address and handle request service
-            # # with sp.if_(self.check_parse_address(tc.to)):
-            # #     with sp.if_(self.handle_request_service(tc.to, tc.assets)):
-            # self.send_response_message(types.Types.ServiceType.open_variant("REQUEST_COIN_TRANSFER"), _from, sn, "", self.RC_OK)
-            # sp.emit(sp.record(from_address=_from, to=tc.to, serial_no=self.data.serial_no, assets_details=tc.assets))
-            #     # with sp.else_():
-            #     #     err_msg = "ErrorWhileMinting"
-            # # with sp.else_():
-            # err_msg = "InvalidAddress"
-            # self.send_response_message(types.Types.ServiceType.open_variant("REQUEST_COIN_TRANSFER"), _from, sn, err_msg, self.RC_ERR)
-
+        return_value = sp.record(string=sp.some(callback_string.value), bsh_addr=bsh_addr, prev=prev,
+                                 callback_msg=callback_msg)
+        sp.transfer(return_value, sp.tez(0), callback)
 
     @sp.entry_point
     def handle_btp_error(self, svc, sn, code, msg, callback, bsh_addr):
@@ -399,16 +393,17 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.set_type(bsh_addr, sp.TAddress)
 
         check_caller = self.only_bmc()
-
+        handle_btp_error_status = sp.local("handle_btp_error_statue", "")
         with sp.if_((svc == self.service_name) & (check_caller == "Authorized") & (sp.len(sp.pack(self.data.requests.get(sn).from_)) != 0)):
             emit_msg= sp.concat(["errCode: ", sp.view("string_of_int", self.data.parse_contract, sp.to_int(code), t=sp.TString).open_some(),", errMsg: ", msg])
-            self.handle_response_service(sn, self.RC_ERR, emit_msg)
-
-            return_value = sp.record(string=sp.some("success"), bsh_addr=bsh_addr, svc=svc, sn=sn, code=code, msg=msg)
-            sp.transfer(return_value, sp.tez(0), callback)
+            handle_response_serv = self.handle_response_service(sn, self.RC_ERR, emit_msg)
+            with sp.if_(handle_response_serv == "success"):
+                handle_btp_error_status.value = "success"
         with sp.else_():
-            return_value = sp.record(string=sp.some("fail"), bsh_addr=bsh_addr, svc=svc, sn=sn, code=code, msg=msg)
-            sp.transfer(return_value, sp.tez(0), callback)
+            handle_btp_error_status.value = "fail"
+
+        return_value = sp.record(string=sp.some(handle_btp_error_status.value), bsh_addr=bsh_addr, svc=svc, sn=sn, code=code, msg=msg)
+        sp.transfer(return_value, sp.tez(0), callback)
 
     def handle_response_service(self, sn, code, msg):
         """
@@ -425,24 +420,28 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         caller = sp.local("caller", sp.view("str_to_addr", self.data.parse_contract, self.data.requests.get(sn).from_, t=sp.TAddress).open_some()
                           , sp.TAddress).value
         loop = sp.local("loop", sp.len(self.data.requests.get(sn).coin_names), sp.TNat).value
-        sp.verify(loop <= self.MAX_BATCH_SIZE, "BatchMaxSizeExceed")
+        response_call_status = sp.local("response_call_status", "")
+        with sp.if_(loop <= self.MAX_BATCH_SIZE):
+            sp.for i in sp.range(0, loop):
+                # inter score call
+                handle_response_service_args_type = sp.TRecord(
+                    requester=sp.TAddress, coin_name=sp.TString, value=sp.TNat, fee=sp.TNat, rsp_code=sp.TNat
+                )
+                handle_response_service_entry_point = sp.contract(handle_response_service_args_type, self.data.bts_core, "handle_response_service").open_some("invalid call")
+                handle_response_service_args = sp.record(
+                    requester=caller, coin_name=self.data.requests.get(sn).coin_names.get(i), value=self.data.requests.get(sn).amounts.get(i),
+                    fee=self.data.requests.get(sn).fees.get(i), rsp_code=code
+                )
+                sp.transfer(handle_response_service_args, sp.tez(0), handle_response_service_entry_point)
 
-        sp.for i in sp.range(0, loop):
-            # inter score call
-            handle_response_service_args_type = sp.TRecord(
-                requester=sp.TAddress, coin_name=sp.TString, value=sp.TNat, fee=sp.TNat, rsp_code=sp.TNat
-            )
-            handle_response_service_entry_point = sp.contract(handle_response_service_args_type, self.data.bts_core, "handle_response_service").open_some("invalid call")
-            handle_response_service_args = sp.record(
-                requester=caller, coin_name=self.data.requests.get(sn).coin_names.get(i), value=self.data.requests.get(sn).amounts.get(i),
-                fee=self.data.requests.get(sn).fees.get(i), rsp_code=code
-            )
-            sp.transfer(handle_response_service_args, sp.tez(0), handle_response_service_entry_point)
+            del self.data.requests[sn]
+            self.data.number_of_pending_requests = sp.as_nat(self.data.number_of_pending_requests-1)
 
-        del self.data.requests[sn]
-        self.data.number_of_pending_requests = sp.as_nat(self.data.number_of_pending_requests-1)
-
-        sp.emit(sp.record(caller=caller, sn=sn, code=code, msg=msg), tag="TransferEnd")
+            sp.emit(sp.record(caller=caller, sn=sn, code=code, msg=msg), tag="TransferEnd")
+            response_call_status.value = "success"
+        with sp.else_():
+            response_call_status.value = "BatchMaxSizeExceed"
+        return response_call_status.value
 
     @sp.entry_point
     def callback_mint(self, string):

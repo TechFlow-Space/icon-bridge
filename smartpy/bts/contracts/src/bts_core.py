@@ -594,7 +594,7 @@ class BTSCore(sp.Contract):
         sp.if requester == sp.self_address:
             sp.if rsp_code == self.RC_ERR:
                 self.data.aggregation_fee[coin_name] = self.data.aggregation_fee.get(coin_name,
-                                                                                     default_value=sp.nat(0)) + fee
+                                                                                     default_value=sp.nat(0)) + value
             return_flag.value = True
 
         sp.if return_flag.value == False:

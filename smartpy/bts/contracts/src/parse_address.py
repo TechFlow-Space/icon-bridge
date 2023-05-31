@@ -95,22 +95,18 @@ class ParseAddress(sp.Contract):
         actual_prefix = sp.local("actual_prefix", "")
         addr = sp.local("addr", sp.address("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg"))
         alphabet = Utils.Bytes.of_string("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
-        sp.trace(":kljlk")
         sp.if sp.len(string_in_bytes) == sp.nat(42):
-            sp.trace("lsdnglknslnd")
             string_in_bytes = sp.slice(string_in_bytes, 6, 36).open_some()
-
             element_list = sp.range(0, sp.len(alphabet), 1)
             temp_map = sp.local("temp_map", {})
             temp_var = sp.local("y", 0)
-            sp.trace("ele")
             sp.for elem in element_list:
                 temp_var.value = elem
                 temp_map.value[sp.slice(alphabet, temp_var.value, 1).open_some()] = temp_var.value
             decimal = sp.local("decimal", 0)
             base = sp.len(alphabet)
             element_list_2 = sp.range(0, sp.len(string_in_bytes), 1)
-            sp.trace("ele1")
+
             sp.for elem in element_list_2:
                 decimal.value = decimal.value * base + temp_map.value[sp.slice(string_in_bytes, elem, 1).open_some()]
             byt_value = Utils.Bytes.of_nat(sp.as_nat(sp.to_int(decimal.value)))
@@ -124,28 +120,21 @@ class ParseAddress(sp.Contract):
                 list_string.value.push(Utils.Int.of_bytes(sp.slice(prefix, temp_var3.value, 1).open_some()))
             v = sp.slice(new_byt_value, 3, sp.as_nat(sp.len(new_byt_value) - 3))
             byte_local = sp.local("byt_old", sp.bytes("0x"))
-            sp.trace("ele2")
+
             sp.for enc in self.base58_encodings:
                 byte_local.value = self.tb([sp.as_nat(Utils.Int.of_string(enc["elem1"])),
                                        sp.as_nat(Utils.Int.of_string(enc["elem2"])),
                                        sp.as_nat(Utils.Int.of_string(enc["elem3"]))])
                 sp.if byte_local.value == prefix:
                     actual_prefix.value = enc["prefix"]
-            sp.trace("ele3")
+
             sp.for item in self.tz_prefixes.items():
-                sp.trace(item.value)
-                sp.trace("k")
-                sp.trace(actual_prefix.value)
                 sp.if item.value == actual_prefix.value:
-                    sp.trace("in if")
                     decoded_address = sp.unpack(sp.bytes("0x050a00000016") + item.key + v.open_some(),
                                                 sp.TAddress)
                     addr.value = decoded_address.open_some()
                     # return addr.value
-            sp.trace("actual")
-            sp.trace(actual_prefix.value)
             sp.if actual_prefix.value == "KT1":
-                sp.trace("KTSSSS")
                 decoded_address = sp.unpack(
                     sp.bytes("0x050a00000016") + sp.bytes("0x01") + v.open_some() + sp.bytes("0x00"),
                     sp.TAddress)
@@ -162,9 +151,7 @@ class ParseAddress(sp.Contract):
                 addr.value = decoded_address.open_some()
 
             sp.if actual_prefix.value == "":
-                sp.trace("in else")
                 addr.value = sp.address("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg")
-
         with sp.else_():
             addr.value =  sp.address("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg")
 

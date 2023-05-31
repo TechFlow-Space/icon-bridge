@@ -25,8 +25,9 @@ class EncodeLibrary:
             coin_name.value = sp.view("encode_string", self.data.helper, data.assets.get(i, default_value=sp.record(coin_name="",value=sp.nat(0))).coin_name, t=sp.TBytes).open_some()
             temp.value =  sp.view("encode_nat", self.data.helper, data.assets.get(i, default_value=sp.record(coin_name="",value=sp.nat(0))).value, t=sp.TBytes).open_some()
             x.value = sp.view("encode_list", self.data.helper, [rlp.value, coin_name.value, temp.value], t=sp.TBytes).open_some()
-            rlp.value = sp.view("with_length_prefix", self.data.helper, x.value,
-                                                  t=sp.TBytes).open_some()
+            rlp.value = sp.view("encode_list", self.data.helper, [x.value], t=sp.TBytes).open_some()
+            # rlp.value = sp.view("with_length_prefix", self.data.helper, rlp.value,
+            #                                       t=sp.TBytes).open_some()
 
         from_addr_encoded = sp.view("encode_string", self.data.helper, data.from_addr, t=sp.TBytes).open_some()
         to_addr_encoded = sp.view("encode_string", self.data.helper, data.to, t=sp.TBytes).open_some()

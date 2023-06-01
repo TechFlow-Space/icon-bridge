@@ -314,7 +314,7 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
                                                                  bsh_addr,
                                                                  "handle_btp_error").open_some()
                     handle_btp_error_args = sp.record(callback=sp.self_entry_point("callback_btp_error"), bsh_addr=bsh_addr,
-                                                      svc=msg.svc, sn=msg.sn * -1, code=res.code, msg=res.message)
+                                                      svc=msg.svc, sn=msg.sn * -1, code=res.code, msg="error")
                     sp.transfer(handle_btp_error_args, sp.tez(0), handle_btp_error_entry_point)
 
     def _send_message(self, to ,serialized_msg):

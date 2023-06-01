@@ -54,16 +54,16 @@ class ParseAddress(sp.Contract):
             byte_str.value += Utils.Bytes.of_nat(num)
         return byte_str.value
 
-    def base58_encode(self, v, prefix, _byte):
+    def base58_encode(self, byt_array, prefix, _byte):
         """
         Encode data using Base58 with checksum and add an according binary prefix in the end.
-        :param v: Array of bytes
+        :param byt_array: Array of bytes
         :param prefix: Human-readable prefix (use b'') e.g. b'tz', b'KT', etc
         :param local_byte: local variable
 
         :returns: bytes (use string.decode())
         """
-        length_v = sp.to_int(sp.len(v))
+        length_v = sp.to_int(sp.len(byt_array))
         encoding = sp.local("encode", sp.map({}))
         byte_from_tbl = sp.local("byte_from_tbl", sp.bytes("0x"))
         byte_value = _byte
@@ -74,8 +74,8 @@ class ParseAddress(sp.Contract):
                 byte_from_tbl.value = self.tb([sp.as_nat(Utils.Int.of_string(enc["elem1"])),
                                           sp.as_nat(Utils.Int.of_string(enc["elem2"])),
                                           sp.as_nat(Utils.Int.of_string(enc["elem3"]))])
-        sha256_encoding = sp.sha256(sp.sha256(byte_from_tbl.value + v))
-        sha256_encoding = byte_from_tbl.value + v + sp.slice(sha256_encoding, 0, 4).open_some()
+        sha256_encoding = sp.sha256(sp.sha256(byte_from_tbl.value + byt_array))
+        sha256_encoding = byte_from_tbl.value + byt_array + sp.slice(sha256_encoding, 0, 4).open_some()
         acc = sp.local("for_while_loop", Utils.Int.of_bytes(sha256_encoding))
         alphabet = Utils.Bytes.of_string("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
         base = 58
@@ -118,7 +118,7 @@ class ParseAddress(sp.Contract):
             sp.for x in prefix_len:
                 temp_var3.value = x
                 list_string.value.push(Utils.Int.of_bytes(sp.slice(prefix, temp_var3.value, 1).open_some()))
-            v = sp.slice(new_byt_value, 3, sp.as_nat(sp.len(new_byt_value) - 3))
+            value = sp.slice(new_byt_value, 3, sp.as_nat(sp.len(new_byt_value) - 3))
             byte_local = sp.local("byt_old", sp.bytes("0x"))
 
             sp.for enc in self.base58_encodings:
@@ -130,23 +130,22 @@ class ParseAddress(sp.Contract):
 
             sp.for item in self.tz_prefixes.items():
                 sp.if item.value == actual_prefix.value:
-                    decoded_address = sp.unpack(sp.bytes("0x050a00000016") + item.key + v.open_some(),
+                    decoded_address = sp.unpack(sp.bytes("0x050a00000016") + item.key + value.open_some(),
                                                 sp.TAddress)
                     addr.value = decoded_address.open_some()
-                    # return addr.value
             sp.if actual_prefix.value == "KT1":
                 decoded_address = sp.unpack(
-                    sp.bytes("0x050a00000016") + sp.bytes("0x01") + v.open_some() + sp.bytes("0x00"),
+                    sp.bytes("0x050a00000016") + sp.bytes("0x01") + value.open_some() + sp.bytes("0x00"),
                     sp.TAddress)
                 addr.value = decoded_address.open_some()
             sp.if actual_prefix.value == "txr1":
                 decoded_address = sp.unpack(
-                    sp.bytes("0x050a00000016") + sp.bytes("0x02") + v.open_some() + sp.bytes("0x00"),
+                    sp.bytes("0x050a00000016") + sp.bytes("0x02") + value.open_some() + sp.bytes("0x00"),
                     sp.TAddress)
                 addr.value = decoded_address.open_some()
             sp.if actual_prefix.value == "sr1":
                 decoded_address = sp.unpack(
-                    sp.bytes("0x050a00000016") + sp.bytes("0x03") + v.open_some() + sp.bytes("0x00"),
+                    sp.bytes("0x050a00000016") + sp.bytes("0x03") + value.open_some() + sp.bytes("0x00"),
                     sp.TAddress)
                 addr.value = decoded_address.open_some()
 

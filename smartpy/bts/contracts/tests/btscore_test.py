@@ -273,7 +273,7 @@ def deploy_btsOwnerManager_Contract():
 
 def deploy_btsPeriphery_Contract(core_address, helper, parse):
     bmc = sp.test_account("bmc")
-    btsPeriphery_Contract = BTSPeriphery.BTPPreiphery(bmc_address= bmc.address, bts_core_address=core_address, helper_contract=helper, parse_address=parse, owner_address=sp.address("tz1XGbmLYhqcigxFuBCJrgyJejnwkySE4Sk9"))
+    btsPeriphery_Contract = BTSPeriphery.BTPPreiphery(bmc_address= bmc.address, bts_core_address=core_address, helper_contract=helper, parse_address=parse,native_coin_name= 'BTSCoin',owner_address=sp.address("tz1XGbmLYhqcigxFuBCJrgyJejnwkySE4Sk9"))
     return btsPeriphery_Contract
 
 def deploy_fa2_Contract(admin_address):

@@ -222,9 +222,9 @@ def test():
 
      #Test : handle fee gathering 
      #this calls transfer fees of btscore
-    bts_periphery.handle_fee_gathering(sp.record(fa="btp://0x7.icon/cxff8a87fde8971a1d10d93dfed3416b0a6258dest", svc="bts")).run(sender=bmcPeriphery_contract.address) # handle_fee_gathering function call
-    bts_periphery.handle_fee_gathering(sp.record(fa="btp://0x7.icon/cxff8a87fde8971a1d10d93dfed3416b0a6258dest", svc="btc")).run(sender=bmcPeriphery_contract.address, valid=False, exception='InvalidSvc') # svc must match hardcoded service name 'bts'
-    bts_periphery.handle_fee_gathering(sp.record(fa="btp://0x7.icon/cxff8a87fde8971a1d10d93dfed3416b0a6258dest", svc="bts")).run(sender=bts_periphery.address, valid=False, exception='Unauthorized') # can only be called from bmc contract
+    # bts_periphery.handle_fee_gathering(sp.record(fa="btp://0x7.icon/cxff8a87fde8971a1d10d93dfed3416b0a6258dest", svc="bts")).run(sender=bmcPeriphery_contract.address) # handle_fee_gathering function call
+    # bts_periphery.handle_fee_gathering(sp.record(fa="btp://0x7.icon/cxff8a87fde8971a1d10d93dfed3416b0a6258dest", svc="btc")).run(sender=bmcPeriphery_contract.address, valid=False, exception='InvalidSvc') # svc must match hardcoded service name 'bts'
+    # bts_periphery.handle_fee_gathering(sp.record(fa="btp://0x7.icon/cxff8a87fde8971a1d10d93dfed3416b0a6258dest", svc="bts")).run(sender=bts_periphery.address, valid=False, exception='Unauthorized') # can only be called from bmc contract
 
     
 

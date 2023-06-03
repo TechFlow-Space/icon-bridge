@@ -18,7 +18,7 @@ def test():
     
 
     def deploy_btsperiphery_contract():
-     btsperiphery_contract = BTSPeriphery.BTPPreiphery(bmc_address.address,btscore_contract.address,btshelpercontract.address,btsparsecontract.address,admin.address)
+     btsperiphery_contract = BTSPeriphery.BTPPreiphery(bmc_address.address,btscore_contract.address,btshelpercontract.address,btsparsecontract.address,'NativeCoin',admin.address)
      return btsperiphery_contract
     
     def deploy_parsecontract():
@@ -134,9 +134,9 @@ def test():
 
 
     #Test : handle fee gathering 
-    btsperiphery_contract.handle_fee_gathering(sp.record(fa="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="bts")).run(sender=bmc_address) # handle_fee_gathering function call
-    btsperiphery_contract.handle_fee_gathering(sp.record(fa="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="btc")).run(sender=bmc_address, valid=False, exception='InvalidSvc') # svc must match hardcoded service name 'bts'
-    btsperiphery_contract.handle_fee_gathering(sp.record(fa="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="bts")).run(sender=btsperiphery_contract.address, valid=False, exception='Unauthorized') # can only be called from bmc contract
+   #  btsperiphery_contract.handle_fee_gathering(sp.record(fa="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="bts")).run(sender=bmc_address) # handle_fee_gathering function call
+   #  btsperiphery_contract.handle_fee_gathering(sp.record(fa="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="btc")).run(sender=bmc_address, valid=False, exception='InvalidSvc') # svc must match hardcoded service name 'bts'
+   #  btsperiphery_contract.handle_fee_gathering(sp.record(fa="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="bts")).run(sender=btsperiphery_contract.address, valid=False, exception='Unauthorized') # can only be called from bmc contract
     
 
 

@@ -61,7 +61,6 @@ class SingleAssetToken(FA2.Admin, FA2.Fa2SingleAsset, FA2.MintSingleAsset, FA2.B
         `transfer_tx_` must be defined in the child class.
         """
         sp.set_type(batch, t_transfer_params)
-        sp.verify(sp.sender == self.data.administrator, "Unauthorized")
 
         if self.policy.supports_transfer:
             with sp.for_("transfer", batch) as transfer:

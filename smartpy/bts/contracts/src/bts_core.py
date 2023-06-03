@@ -630,7 +630,7 @@ class BTSCore(sp.Contract):
                 fa2_address = self.data.coins[coin_name]
                 sp.if (coin_name != self.data.native_coin_name) & (self.data.coin_details[coin_name].coin_type == self.NATIVE_WRAPPED_COIN_TYPE):
                     # call burn in FA2
-                    burn_args_type = sp.TList(sp.TRecord(from_=sp.TAddress, token_id=sp.TNat, amount=sp.TNat))
+                    burn_args_type = sp.TList(sp.TRecord(from_=sp.TAddress, token_id=sp.TNat, amount=sp.TNat).layout(("from_", ("token_id", "amount"))))
                     burn_entry_point = sp.contract(burn_args_type, fa2_address, "burn").open_some()
                     burn_args = [sp.record(from_=sp.self_address, token_id=sp.nat(0), amount=value)]
                     sp.transfer(burn_args, sp.tez(0), burn_entry_point)

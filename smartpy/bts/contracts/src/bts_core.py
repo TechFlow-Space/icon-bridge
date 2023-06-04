@@ -697,41 +697,7 @@ class BTSCore(sp.Contract):
         sp.set_type(owner_manager, sp.TAddress)
 
         sp.verify(self.data.owners.get(sp.sender) == True , message= "Unauthorized")
-        # sp.verify(owner_manager != sp.address("tz1VA29GwaSA814BVM7AzeqVzxztEjjxiMEc"), message= "InvalidAddress")
         self.data.bts_owner_manager = owner_manager
-
-@sp.add_test(name="BTSCore")
-def test():
-    alice=sp.test_account("Alice")
-    receiver=sp.test_account("receiver")
-    c1 = BTSCore(
-        owner_manager=sp.address("tz1VA29GwaSA814BVM7AzeqVzxztEjjxiMEc"),
-        _native_coin_name="NativeCoin",
-        _fee_numerator=sp.nat(1000),
-        _fixed_fee=sp.nat(10)
-    )
-    scenario = sp.test_scenario()
-    scenario.h1("BTSCore")
-    scenario += c1
-    c2 = FA2_contract.SingleAssetToken(admin=alice.address, metadata=sp.big_map({"ss": sp.bytes("0x0dae11")}),
-                              token_metadata=sp.map({"ff": sp.bytes("0x0dae11")}))
-    scenario +=c2
-    # c1.update_bts_periphery(sp.address("KT1VCbyNieUsQsCShkxtTz9ZbLmE9oowmJPm")).run(sender=alice)
-    # c1.register(sp.record(name="tezos", symbol="TEZ", decimals=sp.nat(18), fee_numerator=sp.nat(5), fixed_fee=sp.nat(1),
-    #                       addr=c2.address,
-    #                       token_metadata=sp.map({"ss": sp.bytes("0x0dae11")}),
-    #             metadata=sp.big_map({"ff": sp.bytes("0x0dae11")}))).run(sender=alice)
-    # c2.mint([sp.record(to_=c1.address, amount=sp.nat(200))]).run(sender=alice)
-
-    # c2.transfer([sp.record(callback=sp.contract(
-    #     sp.TRecord(string=sp.TOption(sp.TString), requester=sp.TAddress, coin_name=sp.TString, value=sp.TNat),
-    #     c1.address,
-    #     entry_point="callback",
-    # ).open_some(),from_=alice.address, coin_name="tezos", txs=[sp.record(to_=receiver.address, token_id=0, amount=100)])]).run(
-    #         sender=alice)
-
-    # c1.handle_response_service(sp.record(requester=sp.address("KT1VCbyNieUsQsCShkxtTz9ZbLmE9oowmJPm"), coin_name="tezos",
-    #                                      value=sp.nat(44), fee=sp.nat(3), rsp_code=sp.nat(1))).run(sender=alice)
 
 
 sp.add_compilation_target("bts_core", BTSCore(

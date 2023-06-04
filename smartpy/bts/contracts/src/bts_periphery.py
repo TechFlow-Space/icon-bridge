@@ -92,7 +92,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             with sp.else_():
                 sp.failwith("InvalidAddress")
 
-    # made a private function to return the tx status made from handle_btp_message
+    # private function to return the tx status made from handle_btp_message
     def _add_to_blacklist(self, params):
         """
         :param params: List of addresses to be blacklisted
@@ -133,7 +133,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             with sp.else_():
                 sp.failwith("InvalidAddress")
 
-    # made a private function to return the tx status made from handle_btp_message
+    # private function to return the tx status made from handle_btp_message
     def _remove_from_blacklist(self, params):
         """
         :param params: list of address strings
@@ -174,7 +174,7 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         sp.for i in sp.range(0, sp.len(coin_names)):
             self.data.token_limit[coin_names[i]] = token_limit.get(i)
 
-    # made a private function to return the tx status made from handle_btp_message
+    # private function to return the tx status made from handle_btp_message
     def _set_token_limit(self, coin_names, token_limit):
         """
         :param coin_names: list of coin names
@@ -596,40 +596,6 @@ class BTPPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
         with sp.else_():
             sp.result(False)
 
-
-
-@sp.add_test(name="Counter")
-def test():
-    bmc = sp.test_account("Alice")
-    admin = sp.test_account("Admin")
-    bts_core = sp.test_account("BTS")
-    helper = sp.test_account("Helper")
-    owner = sp.test_account("Owner")
-
-    scenario = sp.test_scenario()
-    counter = BTPPreiphery(bmc.address, bts_core.address, helper.address, admin.address, "NativeCoin", owner.address)
-    scenario += counter
-
-    # counter.add_to_blacklist({0:"tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW"}).run(sender=counter.address)
-    # counter.send_service_message(sp.record(_from=sp.address("tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW"), to="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW",
-    #                                        coin_names={0:"Tok1"}, values={0:sp.nat(10)}, fees={0:sp.nat(2)})).run(
-    #     sender=bts_core
-    # )
-    # counter.handle_btp_error(sp.record(svc= "bts", code=sp.nat(2), sn=sp.int(1), msg="test 1")).run(
-    #     sender=bmc
-    # )
-
-    # counter.set_token_limit(sp.record(coin_names={0:"Tok2"}, token_limit={0:sp.nat(5)})).run(sender=counter.address)
-
-    # counter.handle_request_service(sp.record(to= "tz1VA29GwaSA814BVM7AzeqVzxztEjjxiMEc", assets={0:
-    #                                          sp.record(coin_name="Tok2", value=sp.nat(4))})).run(
-    #     sender=counter.address
-    # )
-
-    # counter.handle_fee_gathering(sp.record(fa="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="bts")).run(sender=bmc)
-
-    # counter.handle_btp_message(sp.record(_from="tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", svc="bts", sn=sp.int(4),
-    #                                      msg=sp.bytes("0x0507070a000000030dae110000") )).run(sender=admin)
 
 
 sp.add_compilation_target("bts_periphery", BTPPreiphery(bmc_address=sp.address("KT1UrLqhQHDC3mJw9BUrqsiix7JRbxTsvWJu"),

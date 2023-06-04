@@ -74,11 +74,4 @@ class Helper(sp.Contract):
         sp.result(encode_list_packed(params))
 
 
-@sp.add_test(name="Helper")
-def test():
-    scenario = sp.test_scenario()
-    helper = Helper()
-    scenario += helper
-
-
 sp.add_compilation_target("helper", Helper())

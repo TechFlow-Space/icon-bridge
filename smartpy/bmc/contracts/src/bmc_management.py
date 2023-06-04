@@ -3,12 +3,7 @@ import smartpy as sp
 types = sp.io.import_script_from_url("file:./contracts/src/Types.py")
 strings = sp.io.import_script_from_url("file:./contracts/src/String.py")
 rlp_encode = sp.io.import_script_from_url("file:./contracts/src/RLP_encode_struct.py")
-# bmc_periphery_file = sp.io.import_script_from_url(
-#     "file:./contracts/src/bmc_periphery.py")
-# helper_file = sp.io.import_script_from_url(
-#     "file:./contracts/src/helper.py")
-# parse_address_file = sp.io.import_script_from_url(
-#     "file:./contracts/src/parse_address.py")
+
 
 class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
     BLOCK_INTERVAL_MSEC = sp.nat(1000)
@@ -572,50 +567,5 @@ class BMCManagement(sp.Contract, rlp_encode.EncodeLibrary):
                     sp.result(sp.pair("Unreachable", "Unreachable: " + dst_net + " is unreachable"))
 
 
-@sp.add_test(name="BMCM")
-def test():
-    alice = sp.test_account("Alice")
-    owner = sp.test_account("Owner")
-    helper = sp.test_account("Helper")
-    # bmc_periphery = sp.test_account("BMC Periphery")
-    # bmc= sp.test_account("BMC")
-
-
-    scenario = sp.test_scenario()
-    # deploy helper
-    # helper_con = helper_file.Helper()
-    # scenario += helper_con
-    #
-    # parse_addr_con = parse_address_file.ParseAddress()
-    # scenario += parse_addr_con
-    #
-    bmc_man = BMCManagement(owner.address, helper.address)
-    scenario += bmc_man
-    # # deploy bmc periphery
-    # bmc_per = bmc_periphery_file.BMCPreiphery(
-    #     bmc_man.address, helper_con.address, parse_addr_con.address
-    # )
-    #
-    # scenario += bmc_per
-    #
-    # bmc_man.set_bmc_periphery(bmc_per.address).run(sender=owner)
-    # bmc_man.set_bmc_btp_address("tezos.77").run(sender=owner)
-    # # bmc_man.add_owner(alice.address).run(sender=owner)
-    #
-    # # bmc_man.remove_owner(alice.address).run(sender=alice)
-    #
-    # bmc_man.add_route(sp.record(dst = "btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hDEST",
-    # link = "btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW")).run(sender= owner)
-    # bmc_man.add_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=owner)
-    # # decode_string = sp.build_lambda(Utils.RLP.Decoder.without_length_prefix)
-    #
-    # # bmc_man.remove_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
-    # # bmc_man.add_link("btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW").run(sender=alice)
-    #
-    # # bmc_man.set_link_rx_height(sp.record(link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", height=sp.nat(2))).run(sender=alice)
-    # # bmc_man.set_link(sp.record(_link="btp://77.tezos/tz1e2HPzZWBsuExFSM4XDBtQiFnaUB5hiPnW", block_interval=sp.nat(2),
-    # #                          update_link_reachable   _max_aggregation=sp.nat(3), delay_limit=sp.nat(2))).run(sender=alice)
-    #
-    #
 sp.add_compilation_target("bmc_management", BMCManagement(owner_address=sp.address("tz1g3pJZPifxhN49ukCZjdEQtyWgX2ERdfqP"),
                                                           helper_contract=sp.address("KT1HwFJmndBWRn3CLbvhUjdupfEomdykL5a6")))

@@ -393,20 +393,6 @@ class BMCPreiphery(sp.Contract, rlp_decode.DecodeLibrary, rlp_encode.EncodeLibra
             current_height=sp.level #block height
         ))
 
-@sp.add_test(name="BMC")
-def test():
-    alice = sp.test_account("Alice")
-    helper = sp.test_account("Helper")
-    parse_contract = sp.test_account("Parser")
-    owner = sp.test_account("Owner")
-    bmc_management = sp.test_account("BMC Management")
-    # bmc= sp.test_account("BMC")
-
-    scenario = sp.test_scenario()
-    # bmc = BMCPreiphery(bmc_management.address, helper.address, parse_contract.address, owner.address)
-    # scenario += bmc
-
-    # bmc.handle_relay_message(sp.record(prev="demo string", msg=sp.bytes("0x0dae11"))).run(sender=alice)
 
 sp.add_compilation_target("bmc_periphery", BMCPreiphery(bmc_management_addr=sp.address("KT1Uiycjx4iXdjKFfR2kAo2NUdEtQ6PmDX4Y"),
                                                         helper_contract=sp.address("KT1HwFJmndBWRn3CLbvhUjdupfEomdykL5a6"),

@@ -13,7 +13,6 @@ import (
 
 	"github.com/icon-project/icon-bridge/common/log"
 
-	"blockwatch.cc/tzgo/codec"
 	"blockwatch.cc/tzgo/contract"
 	"blockwatch.cc/tzgo/micheline"
 	"blockwatch.cc/tzgo/rpc"
@@ -201,34 +200,6 @@ func (c *Client) HandleRelayMessage(ctx context.Context, callArgs contract.CallA
 		return nil, err
 	}
 	return result, nil
-}
-
-func (c *Client) CustomCall(ctx context.Context, args []contract.CallArguments, opts *rpc.CallOptions) (*rpc.Receipt, error) {
-	if opts == nil {
-		opts = &rpc.DefaultOptions
-	}
-
-	// assemble batch transaction
-	op := codec.NewOp().WithTTL(opts.TTL)
-	for _, arg := range args {
-		if arg == nil {
-			continue
-		}
-		op.WithContents(arg.Encode())
-	}
-
-	var limits []tezos.Limits
-	limit := tezos.Limits{
-		GasLimit:     tezos.MumbainetParams.HardGasLimitPerOperation,
-		StorageLimit: tezos.MumbainetParams.HardStorageLimitPerOperation,
-	}
-
-	limits = append(limits, limit)
-
-	op.WithLimits(limits, 0).WithMinFee()
-
-	// prepare, sign and broadcast
-	return c.Cl.Send(ctx, op, opts)
 }
 
 func NewClient(uri string, src tezos.Address, bmcManagement tezos.Address, l log.Logger) (*Client, error) {

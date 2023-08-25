@@ -31,7 +31,7 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/tinylib/msgp v1.1.2 // indirect
 	github.com/vmihailenco/msgpack/v4 v4.3.11
@@ -40,3 +40,5 @@ require (
 )
 
 replace github.com/near/borsh-go => github.com/hugobyte/borsh-go v0.0.0-20221114132807-5ad0a63babe6
+
+replace blockwatch.cc/tzgo => ../tzgo

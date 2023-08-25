@@ -31,8 +31,9 @@ RUN touch /root/.bash_profile && \
 ENV PATH="/root/.gimme/versions/go${GIMME_GO_VERSION}.linux.${TARGETARCH:-amd64}/bin:${GOPATH}/bin:${PATH}"
 RUN . ~/.bash_profile
 
-COPY . bmr
-RUN cd bmr/cmd/iconbridge 
+COPY ./icon-bridge bmr 
+COPY ./tzgo tzgo
+RUN cd bmr/cmd/iconbridge && go build . 
 
 # prod build
 FROM ubuntu:18.04

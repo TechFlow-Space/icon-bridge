@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   bmr:
-    image: i2tbmr2:latest
+    image: i2tbmr:latest
     container_name: bmr
     network_mode: host
     restart: unless-stopped

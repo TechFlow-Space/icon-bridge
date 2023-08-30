@@ -101,7 +101,8 @@ func (vr *Verifier) Update(ctx context.Context, lbn *types.BlockNotification) er
 	vr.next = header.Level + 1
 
 	if vr.cycle != block.Metadata.LevelInfo.Cycle {
-		vr.updateValidatorsAndCycle(ctx, block.Header.Level, block.Metadata.LevelInfo.Cycle)
+		err = vr.updateValidatorsAndCycle(ctx, block.Header.Level, block.Metadata.LevelInfo.Cycle)
+		fmt.Errorf("couldnot update validators and cycle", err)
 	}
 
 	if vr.updatedBn == nil {

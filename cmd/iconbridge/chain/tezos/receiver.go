@@ -223,13 +223,14 @@ func (r *receiver) receiveLoop(ctx context.Context, opts *BnOptions, callback fu
 		}
 		return block.GetLevel()
 	}
-	next, latest := r.opts.Verifier.BlockHeight+1, latestHeight()
+	next, latest := opts.StartHeight + 1, latestHeight()
 
 	var lbn *types.BlockNotification
 
 	for {
 		select {
 		case <-ctx.Done():
+			r.log.Error("context cancelled")
 			return nil
 		case <-heightTicker.C:
 			latest++

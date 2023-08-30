@@ -177,7 +177,10 @@ func (s *sender) Status(ctx context.Context) (link *chain.BMCLinkStatus, err err
 		return nil, ctx.Err()
 	}
 
-	status, err := s.cls.GetStatus(ctx, s.cls.Contract, s.src.String())
+	_ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	status, err := s.cls.GetStatus(_ctx, s.cls.Contract, s.src.String())
 	if err != nil {
 		return nil, err
 	}

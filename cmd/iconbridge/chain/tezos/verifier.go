@@ -249,7 +249,7 @@ func (vr *Verifier) verifyEndorsement(block *rpc.Block, chainID tezos.ChainIdHas
 			}
 		}
 	}
-	if endorsementPower > int(threshold) {
+	if endorsementPower >= int(threshold) {
 		return nil
 	}
 	return errors.New("endorsement verification failed")

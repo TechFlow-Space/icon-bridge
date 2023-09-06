@@ -85,7 +85,13 @@ func NewSender(
 
 func (s *sender) Balance(ctx context.Context) (balance, threshold *big.Int, err error) {
 	address := tezos.MustParseAddress(s.w.Address())
-	balance, err = s.cls.GetBalance(ctx, s.cls.Cl, address, s.cls.blockLevel)
+
+	block, err := s.cls.Cl.GetHeadBlock(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	balance, err = s.cls.GetBalance(ctx, s.cls.Cl, address, block.GetLevel())
 	if err != nil {
 		return nil, nil, err
 	}

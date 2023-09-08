@@ -86,12 +86,15 @@ func NewSender(
 func (s *sender) Balance(ctx context.Context) (balance, threshold *big.Int, err error) {
 	address := tezos.MustParseAddress(s.w.Address())
 
-	block, err := s.cls.Cl.GetHeadBlock(ctx)
+	_ctx, cancel := context.WithCancel(ctx)
+	defer cancel() 
+
+	block, err := s.cls.Cl.GetHeadBlock(_ctx)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	balance, err = s.cls.GetBalance(ctx, s.cls.Cl, address, block.GetLevel())
+	balance, err = s.cls.GetBalance(_ctx, s.cls.Cl, address, block.GetLevel())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -299,12 +302,15 @@ func (tx *relayTx) Receipt(ctx context.Context) (blockHeight uint64, err error) 
 		return 0, fmt.Errorf("couldnot get receipt")
 	}
 
-	_, err = tx.cl.GetOperationByHash(ctx, tx.cl.Cl, tx.receipt.Block, tx.receipt.List, tx.receipt.Pos)
+	_ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	_, err = tx.cl.GetOperationByHash(_ctx, tx.cl.Cl, tx.receipt.Block, tx.receipt.List, tx.receipt.Pos)
 	if err != nil {
 		return 0, err
 	}
 
-	blockHeight, err = tx.cl.GetBlockHeightByHash(ctx, tx.cl.Cl, tx.receipt.Block)
+	blockHeight, err = tx.cl.GetBlockHeightByHash(_ctx, tx.cl.Cl, tx.receipt.Block)
 	if err != nil {
 		return 0, err
 	}
